@@ -1,0 +1,30 @@
+#
+# Docker Compose file for the Status and Console Components
+#   
+#
+name: ctxd-ops
+
+secrets:
+  git:
+    file: ../../secrets/high/git  
+  user:
+    file: ../../secrets/ops/users/ct-admin     
+
+services:
+
+  status:
+    extends: 
+      file: ../ops/ops.yml
+      service: status
+    image: ctxd_ops_status:2.11.0
+
+  console:
+    extends: 
+      file: ../ops/ops.yml
+      service: console
+    image: sfjs-console:2.31.0
+  
+networks:
+  ctxd_high:
+    name: ctxd_high
+

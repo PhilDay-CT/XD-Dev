@@ -1,0 +1,36 @@
+#
+# Docker Compose file for the Console
+#   
+name: ctxd-ops
+
+secrets:
+  git:
+    file: ../../secrets/high/git    
+  user:
+    file: ../../secrets/ops/users/ct-admin
+
+services:
+
+  console:
+    image: ghcr.io/configuredthings/sfjs-console:2.31.1
+    hostname: ops-console
+    environment:
+      - SFJS_CONSOLE_PORT=33080
+    ports:
+      - 33080:80
+    volumes:
+      - ../../volumes/ops/console/ct-admin/settings.sfjs:/opt/ct/gui/settings.sfjs
+      - ../../volumes/ops/console/ct-admin/git.sfjs:/opt/ct/gui/git.sfjs
+      - ../../volumes/ops/console/ct-admin/user.sfjs:/opt/ct/gui/user.sfjs
+      - ../../volumes/ops/console/ct-admin/certs:/opt/ct/gui/certs
+    secrets:
+      - git
+      - user
+    networks:
+      - ctxd_high
+
+networks:
+  ctxd_high:
+    name: ctxd_high
+
+

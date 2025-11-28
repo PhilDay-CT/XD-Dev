@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  ct-pki:
+    image: ghcr.io/configuredthings/ct-pki:1.0.0
+    user: ${UID}:${GID}
+    volumes:
+      - ./${PKI_ENV:-.}/pkiModel.sfjs:/opt/ct/pkiModel.sfjs
+      - ./${PKI_ENV:-.}/certs:/opt/ct/PKI/

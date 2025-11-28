@@ -1,0 +1,82 @@
+#
+# Docker Compose file for the Low Domain Services
+#
+
+name: "ctxd-low"
+
+configs:
+
+  # Low side of the Gateway (i.e. to High domain)
+  gateway_low:
+    content: |
+      {
+        host: "gateway.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # Low Side Export Web Server
+  export_low:
+    content: |
+      {
+        host: "export.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # External MQTT server
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+services:
+
+  #
+  # Low Domain Import Service
+  #    
+  low_import:
+    extends: 
+      file: ../../docker-compose/low/ctxd.yml
+      service: low_import  
+    image: ghcr.io/configuredthings/in423xd_low_import:2.9.0
+    
+  #
+  # Low Domain Export Service
+  #  
+  low_export:
+    extends: 
+      file: ../../docker-compose/low/ctxd.yml
+      service: low_export  
+    image:  ghcr.io/configuredthings/in423xd_low_export:2.9.0
+
+      
+  #
+  # Low Domain MQTT Service
+  #
+  low_mqtt:
+    extends: 
+      file: ../../docker-compose/low/ctxd.yml
+      service: low_mqtt  
+    image: ghcr.io/configuredthings/in423xd_low_mqtt:2.9.0
+    
+  #
+  # Low Domain Device Emulator Service
+  #
+  low_emulators:
+    extends: 
+      file: ../../docker-compose/low/ctxd.yml
+      service: low_emulators
+    image:  ghcr.io/configuredthings/in423xd_low_emulators:2.9.0
+    
+networks:
+  ctxd_low:
+    name: ctxd_low
+
+
+

@@ -1,0 +1,22 @@
+#
+# Docker Compose file to provide a signing service
+# for all the files in configurtaion repository
+#
+#
+version: "3"
+name: ct-base
+
+services:
+
+  sign:
+    image: ghcr.io/configuredthings/sfjs-base:latest
+    environment:
+      - PASSPHRASE=${CT_SIGN_PASSPHRASE:--}
+      - MODE=${CT_SIGN_MODE:-replace}
+      - MATCH=${CT_SIGN_FILES:-[A-Za-z0-9].*}
+    command: /opt/ct/bin/sign.sh
+    volumes:
+      - ${CT_SIGN_DIR}:/opt/ct/signing/files
+      - ${CT_SIGN_CERT}:/opt/ct/signing/cert
+      - ${CT_SIGN_KEY}:/opt/ct/signing/key
+

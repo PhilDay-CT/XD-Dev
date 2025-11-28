@@ -1,0 +1,162 @@
+#
+# Docker Compose file for the High Domain Services
+#
+
+name: "ctxd-high"
+
+# Integrations with external systems are defined by
+# config blocks.  See the document  
+configs:
+
+  # The high side of the Gateway (i.e. to Low domain)
+  gateway_high:
+    content: |
+      {
+        host: "gateway.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # High Side Import Web Server
+  import_high:
+    content: |
+      {
+        host: "import.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # High Side Import Status Server
+  status_high:
+    content: |
+      {
+        status: {
+          remote: {
+            host: "import.high.ctxd", 
+            port: 7776, 
+            channel: "ct-status"
+          }
+        }
+      }
+
+  # External MQTT server
+  mqtt_high:
+    content: |
+      {
+        enabled:  true,
+        protocol: mqtt,
+        host:     "mqtt.high.ctxd",
+        port:     1883,
+        format:   json
+      }
+
+  # Alert targets    
+  alerts_high:
+    content: |
+      {
+        console: {enabled: true},
+        slack:   {enabled: false},
+        mqtt:    {enabled: false},
+      }
+
+  # Thingsboard (Metrics)
+  thingsboard_high:
+    content: |
+      {enabled: false}
+
+  # Pipeline Telemetry
+  stats_high:
+    content: |
+      {
+        thingsboard: {enabled: false}
+      }
+
+#
+# Secrets
+#
+secrets:
+  git:
+    file: ../../secrets/high/git    
+
+#
+# List of Dockers
+#
+services:
+
+  #
+  # High Domain Import Service
+  #    
+  high_import:
+    image:  ghcr.io/configuredthings/ctxd_high_import:2.11.0
+    hostname: high_import
+    networks:
+      ctxd_high:
+        aliases:
+          - import.high.ctxd
+    volumes:
+      - ../../volumes/high/import/certs:/opt/ct/config/certs
+    secrets:
+      - git
+    configs:
+      - source: import_high
+        target: /opt/ct/config/import.sfjs
+      - source: mqtt_high
+        target: /opt/ct/integrations/mqtt.sfjs
+      - source: thingsboard_high  
+        target: /opt/ct/integrations/thingsboard.sfjs
+      - source: alerts_high
+        target: /opt/ct/config/alerts.sfjs
+      - source: stats_high  
+        target: /opt/ct/config/stats.sfjs
+
+    
+  #
+  # High Domain Export Service
+  #  
+  high_export:
+    image:  ghcr.io/configuredthings/ctxd_high_export:2.11.0
+    hostname: high_export
+    networks:
+      ctxd_high:
+        aliases:
+          - config.high.ctxd
+    volumes:
+      - ../../volumes/high/export/certs:/opt/ct/config/certs
+      - ../../volumes/high/export/keys:/opt/ct/config/keys
+      - ../../volumes/high/export/git.sfjs:/opt/ct/config/git.sfjs
+      - ../../volumes/high/export/policy.sfjs:/opt/ct/config/policy.sfjs
+    secrets:
+      - git
+    configs:
+      - source: status_high
+        target: /opt/ct/system/config/local.sfjs  
+      - source: import_high
+        target: /opt/ct/config/import.sfjs
+      - source: gateway_high
+        target: /opt/ct/config/gateway.sfjs
+      - source: mqtt_high
+        target: /opt/ct/integrations/mqtt.sfjs
+
+  #
+  # High domain MQTT Server
+  #
+  high_mqtt:
+    image:  ghcr.io/configuredthings/ctxd_high_mqtt:2.11.0
+    hostname: high_mqtt
+    ports:
+      - 31883:1883
+    networks:
+      ctxd_high:
+        aliases:
+          - mqtt.high.ctxd
+    configs:
+      - source: status_high
+        target: /opt/ct/system/config/local.sfjs
+
+
+networks:
+  ctxd_high:
+    name: ctxd_high
+
+
+

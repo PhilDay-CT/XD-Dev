@@ -1,0 +1,203 @@
+name: "ctxd"
+
+#
+# Docker Compose file for a development version of 
+# the Cross Domain services in "Mono" mode using
+# local images
+#
+configs:
+
+  # High side of the Gateway (i.e. to Low domain)
+  gateway_high:
+    content: |
+      {
+        host: "gateway.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # High Side Import Web Server
+  import_high:
+    content: |
+      {
+        host: "import.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # Low Side Export Web Server
+  export_high:
+    content: |
+      {
+        host: "export.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # High Side Import Status Server
+  status_high:
+    content: |
+      {
+        status: {
+          remote: {
+            host: "import.high.ctxd", 
+            port: 7776, 
+            channel: "ct-status"
+          }
+        }
+      }
+
+  # External High Side MQTT server
+  mqtt_high:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.high.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+  # Alert targets    
+  alerts_high:
+    content: |
+      {
+        console: {enabled: true},
+        slack:   {enabled: false},
+        mqtt:    {enabled: false},
+      }
+
+  # Thingsboard (Metrics)
+  thingsboard_high:
+    content: |
+      {enabled: false}
+
+  # Pipeline Telemetry
+  stats_high:
+    content: |
+      {
+        thingsboard: {enabled: false}
+      }    
+
+  # Low side of the Gateway (i.e. to High domain)
+  gateway_low:
+    content: |
+      {
+        host: "gateway.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  
+  # External Low Side MQTT server
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+  # Low Side Export Web Server
+  export_low:
+    content: |
+      {
+        host: "export.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # Import Diode Config
+  import_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.low.ctxd'},
+        target: {host: 'import.high.ctxd'}
+      }
+
+  # Export Diode Config
+  export_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.high.ctxd'},
+        target: {host: 'export.low.ctxd'},
+      }
+
+#
+# Secrets
+#
+secrets:
+  git:
+    file: ../../secrets/high/git    
+  slack:
+    file: ../../secrets/high/slack    
+
+#
+# List of Dockers
+#
+services:
+
+  high_mqtt:
+    extends: 
+      file: ./mono.yml
+      service: high_mqtt
+    image: ctxd_high_mqtt:2.11.0
+      
+  high_import:
+    extends:
+      file: ./mono.yml
+      service: high_import
+    image: ctxd_high_import:2.11.0
+      
+  high_export:
+    extends:
+      file: ./mono.yml
+      service: high_export
+    image: ctxd_high_export:2.11.0
+  
+
+
+  import_diode:
+    extends: 
+      file: ./mono.yml
+      service: import_diode
+    image: ctxd_diode:2.11.0
+          
+  export_diode:
+    extends: 
+      file: ./mono.yml
+      service: export_diode
+    image: ctxd_diode:2.11.0
+
+  low_mqtt:
+    extends: 
+      file: ./mono.yml
+      service: low_mqtt
+    image: ctxd_low_mqtt:2.11.0
+      
+  low_import:
+    extends:
+      file: ./mono.yml
+      service: low_import
+    image: ctxd_low_import:2.11.0
+
+  low_export:
+    extends:
+      file: ./mono.yml
+      service: low_export
+    image: ctxd_low_export:2.11.0
+
+  low_emulators:
+    extends:
+      file: ./mono.yml
+      service: low_emulators
+    image: ctxd_low_emulators:2.11.0
+
+networks:
+  ctxd_low:
+    name: ctxd_low
+  ctxd_high:
+    name: ctxd_high
+    

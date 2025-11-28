@@ -1,0 +1,8 @@
+//
+// Edit this file to provide login details
+// for the console
+//
+{
+    name: "ct-admin",
+    password: readstring('/run/secrets/user')
+}

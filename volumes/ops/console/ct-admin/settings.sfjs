@@ -1,0 +1,85 @@
+let
+    GIT: require(env('SFJS_CONSOLE_ENV')+'/git.sfjs'),
+    USER: require(env('SFJS_CONSOLE_ENV')+'/user.sfjs'),
+
+in
+{
+    //
+    // The kind of client:
+    //    local:  Interacts with the system via shared directories
+    //    git:    Interacts with the system via a git repository  
+    //
+    config_kind: 'git',
+    status_kind: 'sfjsMM',
+
+
+    //
+    // The directory where signing and encryption keys are stored
+    //
+    cert_dir: env("SFJS_CONSOLE_ENV") + "/certs/signing",
+
+    //
+    // Git (config)
+    //
+    git: {
+        provider: $GIT.provider,
+        user:     $GIT.user,
+        config:   $GIT.repo,
+        config_token: readstring('/run/secrets/git'),
+        config_branch: $GIT.branch,
+        webHook: {
+            host:     "gitwh.high.ctxd",
+            port:     32004,
+            protocol: https,
+            hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/console.high.ctxd.pem",
+            hostCert: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/console.high.ctxd.crt",
+            acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/gitwh.high.ctxd.bundle.crt",
+            channel:  gitWebHook,
+        }
+    },
+
+    //
+    // Status MM
+    //
+    statusDebounce: 10,
+
+    sfjsMM: {
+        status_dir: env("SFJS_CONSOLE_ENV") + '/status', 
+        host: "status.high.ctxd",
+        port: 32002,
+        protocol: https,
+        channel:  ctxdStatus,
+        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/status/console.high.ctxd.pem",
+        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/status/console.high.ctxd.crt",
+        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/status/status.high.ctxd.bundle.crt",
+        //debounce: 0,
+    },
+
+    //
+    // Alerts
+    //
+    alerts: {
+        enabled: true,
+        host: "alerts.high.ctxd",
+        port: 32003,
+        protocol: https,
+        channel:  ctxdAlerts,
+        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/alerts/console.high.ctxd.pem",
+        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/alerts/console.high.ctxd.crt",
+        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/alerts/alerts.high.ctxd.bundle.crt",
+    },
+
+    user: {
+        name: $USER.name,
+        password: $USER.password
+    },
+
+    contacts: {
+        web:      "https://configuredthings.com",
+        email:    "getconfigured@configuredthings.com",
+        linkedin: "https://www.linkedin.com/company/configured-things",
+        twitter:  "https://twitter.com/ConfThings"
+    },
+
+      
+}

@@ -1,0 +1,108 @@
+#
+# Docker Compose file for the Low Domain Services
+#
+
+name: "ctxd-low"
+
+configs:
+
+  # Low side of the Gateway (i.e. to High domain)
+  gateway_low:
+    content: |
+      {
+        host: "gateway.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # Low Side Export Web Server
+  export_low:
+    content: |
+      {
+        host: "export.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # External MQTT server
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+services:
+
+  #
+  # Low Domain Import Service
+  #    
+  low_import:
+    image: ghcr.io/configuredthings/ctxd_low_import:2.11.0
+    hostname: low_import
+    networks:
+      - ctxd_low
+    configs:
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs
+      - source: mqtt_low
+        target: /opt/ct/integrations/mqtt.sfjs
+    
+  #
+  # Low Domain Export Service
+  #  
+  low_export:
+    image:  ghcr.io/configuredthings/ctxd_low_export:2.11.0
+    hostname: low_export
+    networks:
+      ctxd_low:
+        aliases:
+          - config.low.ctxd
+          - export.low.ctxd
+    configs:
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs
+      - source: export_low
+        target: /opt/ct/config/export.sfjs
+      - source: mqtt_low
+        target: /opt/ct/integrations/mqtt.sfjs
+      
+  #
+  # Low Domain MQTT Service
+  #
+  low_mqtt:
+    image: ghcr.io/configuredthings/ctxd_low_mqtt:2.11.0
+    hostname: low_mqtt
+    ports:
+      - 21883:1883
+    networks:
+      ctxd_low:
+        aliases:
+          - mqtt.low.ctxd
+    configs:
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs
+    
+  #
+  # Low Domain Device Emulator Service
+  #
+  low_emulators:
+    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.11.0
+    hostname: low_emulators
+    networks:
+      - ctxd_low
+    configs:
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs
+      - source: mqtt_low
+        target: /opt/ct/integrations/mqtt.sfjs
+    
+networks:
+  ctxd_low:
+    name: ctxd_low
+
+
+

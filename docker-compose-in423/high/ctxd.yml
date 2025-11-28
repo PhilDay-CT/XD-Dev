@@ -1,0 +1,111 @@
+#
+# Docker Compose file for the High Domain Services
+#
+
+name: "ctxd-high"
+
+# Integrations with external systems are defined by
+# config blocks.  See the document  
+configs:
+
+  # The high side of the Gateway (i.e. to Low domain)
+  gateway_high:
+    content: |
+      {
+        host: "gateway.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # High Side Import Web Server
+  import_high:
+    content: |
+      {
+        host: "import.high.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # High Side Import Status Server
+  status_high:
+    content: |
+      {
+        status: {
+          remote: {
+            host: "import.high.ctxd", 
+            port: 7776, 
+            channel: "ct-status"
+          }
+        }
+      }
+
+  # External MQTT server
+  mqtt_high:
+    content: |
+      {
+        enabled:  true,
+        protocol: mqtt,
+        host:     "mqtt.high.ctxd",
+        port:     1883,
+        format:   json
+      }
+
+  # Alert targets    
+  alerts_high:
+    content: |
+      {
+        console: {enabled: true},
+        slack:   {enabled: false},
+        mqtt:    {enabled: false},
+      }
+
+  # Thingsboard (Metrics)
+  thingsboard_high:
+    content: |
+      {enabled: false}
+
+  # Pipeline Telemetry
+  stats_high:
+    content: |
+      {
+        thingsboard: {enabled: false}
+      }    
+
+#
+# List of Dockers
+#
+services:
+
+  #
+  # High Domain Import Service
+  #    
+  high_import:
+    extends: 
+      file: ../../docker-compose/high/ctxd.yml
+      service: high_import  
+    image:  ghcr.io/configuredthings/in423xd_high_import:2.9.0
+    
+    
+  #
+  # High Domain Export Service
+  #  
+  high_export:
+    extends: 
+      file: ../../docker-compose/high/ctxd.yml
+      service: high_export  
+    image:  ghcr.io/configuredthings/in423xd_high_import:2.9.0
+  
+  #
+  # High domain MQTT Server
+  #
+  high_mqtt:
+    extends: 
+      file: ../../docker-compose/high/ctxd.yml
+      service: high_mqtt  
+    
+networks:
+  ctxd_high:
+    name: ctxd_high
+
+
+

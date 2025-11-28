@@ -1,0 +1,41 @@
+# TLS client certificate request
+
+[req]
+default_bits            = 4096
+encrypt_key             = no
+default_md              = sha256
+utf8                    = yes
+string_mask             = utf8only
+prompt                  = no
+distinguished_name      = client_dn
+req_extensions          = client_ext
+
+[ client_dn ]
+countryName             = "UK"
+organizationName        = "Configured Things Ltd."
+0.organizationalUnitName = "ctxd"
+1.organizationalUnitName = "Users"
+
+commonName              = "SystemCrypto"
+
+
+
+[client_ext]
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = clientAuth
+keyUsage                = critical,digitalSignature
+subjectKeyIdentifier    = hash
+
+[name_constraints]
+permitted;DNS.0=example.com
+permitted;DNS.1=example.org
+permitted;DNS.2="ctxd"
+permitted;DNS.3=".ctxd"
+
+[ocsp_ext]
+authorityKeyIdentifier  = keyid:always
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = OCSPSigning
+noCheck                 = yes
+keyUsage                = critical,digitalSignature
+subjectKeyIdentifier    = hash

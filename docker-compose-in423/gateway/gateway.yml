@@ -1,0 +1,83 @@
+#
+# Docker Compose file for a software version
+# of a Gateway.
+#
+
+name: "ctxd"
+
+
+configs:
+
+  # Import Diode Config
+  import_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.low.ctxd'},
+        target: {host: 'import.high.ctxd'}
+      }
+
+  # Export Diode Config
+  export_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.high.ctxd'},
+        target: {host: 'export.low.ctxd'},
+      }
+
+  # High Side Import Status Server
+  status_high:
+    content: |
+      {
+        status: {
+          remote: {
+            host: "import.high.ctxd", 
+            port: 7776, 
+            channel: "ct-status"
+          }
+        }
+      }
+
+services:
+
+  #
+  # Gateway
+  #
+  import_diode:
+    image:  ghcr.io/configuredthings/in423xd_diode:2.9.0
+    hostname: gateway_import
+    networks:
+      ctxd_low:
+        aliases:
+          - gateway.low.ctxd
+      ctxd_high:
+    configs:
+      - source: import_diode
+        target: /opt/ct/config/diode.sfjs
+      - source: status_high
+        target: /opt/ct/system/config/local.sfjs
+
+          
+  export_diode:
+    image:  ghcr.io/configuredthings/in423xd_diode:2.9.0
+    hostname: gateway_export
+    networks:
+      ctxd_high:
+        aliases:
+          - gateway.high.ctxd
+      ctxd_low:     
+    configs:
+      - source: export_diode
+        target: /opt/ct/config/diode.sfjs
+      - source: status_high
+        target: /opt/ct/system/config/local.sfjs
+     
+  
+networks:
+  ctxd_low:
+    name: ctxd_low
+  ctxd_high:
+    name: ctxd_high
+  
+
+
+

@@ -1,0 +1,101 @@
+
+let
+
+    KEYS: {                              // for full options see node crypto module under generateKeyPair
+        name: @@name,                    // Name of the key pair, will be used to generate the filename
+        type: 'ec',                      // This can be 'rsa', 'dsa', 'ec', 'ed25519', 'ed448', 'x25519', 'x448', or 'dh'
+        options: {
+            namedCurve: "prime256v1",    // Name of the curve to use (EC).
+            publicKeyEncoding:  {type: spki, format: pem},   // this is fixed... anything provided here is ignored
+            privateKeyEncoding: {
+                    type: sec1, 
+                    format: pem, // format can be 'pkcs1' (RSA only), 'pkcs8', or 'sec1' (ec only); type can be 'pem' or 'der', if 'der' then it will also produce the 'pem', der currently supported only for pkcs8
+                    passphrase: @@passphrase,
+                    cipher: 'aes-256-cbc'
+                },   
+       },
+        ECDHKeyPair: false
+    },
+
+    CERT: {
+        days: 720,
+        subj: {
+            country:  UK,
+            company:  "Configured Things Ltd.",
+            organisationalUnits: @@organisationalUnits,
+            commonName: @name,
+            email: '',
+            domain: 'ctxd',
+            alternativeNames: [@name]
+        }    
+    },
+
+    TYPE: {
+        type: _,
+        selfsign: false,
+        name: _,
+        keys: _,
+        cert: $CERT,
+        signing: [],
+    },
+
+    ROOT: $TYPE << {
+        type: ROOT,
+        selfsign: true,
+        organisationalUnits: [],
+        keys: $KEYS,
+        passphrase: ""
+    },
+
+    CA: $TYPE << {
+        type: CA,
+        keys: $KEYS,
+        passphrase: ""
+    },
+
+    USER: {
+        type: CLIENT,
+	    name: _,
+        keys: $KEYS,
+        cert: $CERT,
+        passphrase: '',
+    },
+
+    CRYPTO: {
+        type: CLIENT,
+	    name: _,
+        keys: $KEYS << {ECDHKeyPair: true},
+        cert: $CERT,
+        passphrase: '',
+    },
+in
+    {
+        signing: [
+
+            //
+            // Console
+            //
+            $ROOT << {
+                name: "ctxd-users-root-ca",
+                organisationalUnits: [ctxd, Users],
+                signing: [
+                    $CA << {
+                        name: "ctxd-users-admins-ca",
+                        signing: [
+                            $USER << {
+                                name: "ct-admin",
+                                passphrase: "ct-admin"
+                            },
+                            $CRYPTO << {
+                                name: GroupCrypto
+                            },
+                            $CRYPTO << {
+                                name: SystemCrypto
+                            },
+                        ]
+                    },
+                ]
+            },
+        ]
+    }
+    

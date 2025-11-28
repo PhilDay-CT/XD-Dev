@@ -1,0 +1,31 @@
+#
+# Docker Compose file for the Status Service
+#   
+#
+name: ctxd-ops
+
+services:
+
+  status:
+    image: ghcr.io/configuredthings/ctxd_ops_status:2.11.0
+    hostname: ops-status
+    ports:
+      - 32001:32001
+      - 32002:32002
+      - 32003:32003
+      - 32004:32004
+      - 32005:32005
+    volumes:
+      - ../../volumes/ops/status/certs:/opt/ct/config/certs
+    networks:
+      ctxd_high:
+        aliases:
+          - status.high.ctxd
+          - alerts.high.ctxd
+          - gitwh.high.ctxd
+    
+networks:
+  ctxd_high:
+    name: ctxd_high
+
+
