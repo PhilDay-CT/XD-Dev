@@ -50,7 +50,11 @@ configs:
         format:   json
       }
 
-  # Alert targets    
+  # Alert targets
+  #
+  # If enabling slack a an alert target then you also need to uncomment
+  # the slack secrets entries in 'secrets' and 'services.high_import'
+  #    
   alerts_high:
     content: |
       {
@@ -77,7 +81,9 @@ configs:
 secrets:
   git:
     file: ../../secrets/high/git    
-
+  #slack:
+  #  file: ../../secrets/high/slack
+  
 #
 # List of Dockers
 #
@@ -95,8 +101,8 @@ services:
           - import.high.ctxd
     volumes:
       - ../../volumes/high/import/certs:/opt/ct/config/certs
-    secrets:
-      - git
+    #secrets:
+    #  - slack
     configs:
       - source: import_high
         target: /opt/ct/config/import.sfjs
@@ -126,7 +132,7 @@ services:
       - ../../volumes/high/export/git.sfjs:/opt/ct/config/git.sfjs
       - ../../volumes/high/export/policy.sfjs:/opt/ct/config/policy.sfjs
     secrets:
-      - git
+      - git  
     configs:
       - source: status_high
         target: /opt/ct/system/config/local.sfjs  

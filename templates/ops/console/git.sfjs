@@ -4,12 +4,14 @@
 // data.  The account needs to have write access to
 // the repository
 //
+// Note that the token is provided via a secret in
+// the docker compose file
+//
 // For example:
 // {
 //    provider: "github",
 //    user: "CT-Admin",
 //    repo: "github.com/MyOrg/MyConfigRepo.git",
-//    token: "ghp_NotaRealTokenN0taR3alT0kenh0nestlyxx",
 //    branch: 'main',
 // }        
 //
@@ -18,6 +20,5 @@
     provider: << github | bitbucket >>,
     user: << git username >>,
     repo: << git repo: e.g. "bitbucket.org/my_org/config.git" >>,
-    token: << git access token>>,
     branch: 'main',
 }

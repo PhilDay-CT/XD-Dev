@@ -6,9 +6,10 @@ name: ctxd-ops
 
 secrets:
   git:
-    file: ../../secrets/high/git    
+    file: ../../secrets/ops/console/ct-admin/git    
   user:
-    file: ../../secrets/ops/users/ct-admin 
+    file: ../../secrets/ops/console/ct-admin/password
+
 services:
 
   status:

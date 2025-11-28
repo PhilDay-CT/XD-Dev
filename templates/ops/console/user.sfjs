@@ -3,6 +3,6 @@
 // for the console
 //
 {
-    name: <USERNAME>,
+    name: "<USERNAME>",
     password: readstring('/run/secrets/user'),
 }

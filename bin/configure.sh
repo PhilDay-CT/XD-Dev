@@ -314,11 +314,13 @@ for USER in $USERS; do
     echo "  volumes/ops/console/${USER}/git.sfjs"
 done
 
-echo "Remember to create the following files.
+echo
+echo "Remember to create the following files."
 echo "  secrets/high/git"
 echo "  secrets/high/slack (optional)"
 for USER in $USERS; do
-    echo "  secrets/ops/users/${USER}"
+    echo "  secrets/ops/console/${USER}/password"
+    echo "  secrets/ops/console/${USER}/git"
 done
 
 
