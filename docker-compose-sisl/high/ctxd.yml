@@ -72,6 +72,16 @@ configs:
       }    
 
 #
+# Secrets
+#
+secrets:
+  git:
+    file: ../../secrets/high/git    
+  #slack:
+  #  file: ../../secrets/high/slack
+  
+
+#
 # List of Dockers
 #
 services:

@@ -1,17 +1,23 @@
+#
+# Docker Compose file for a "mono" version of the
+# Cross Domain services, which run without a hardsec
+# Gateway.  
+#
+# This combines the services in
+#   docker-compose-low-ctxd.yml
+#   docker-compose-gateway.yml
+#   docker-compose-high-ctxd.yml
+#
+
 name: "ctxd"
 
-#
-# Docker Compose file for a development version of 
-# the Cross Domain services in "Mono" mode using
-# local images
-#
 configs:
 
   # High side of the Gateway (i.e. to Low domain)
   gateway_high:
     content: |
       {
-        host: "gateway.high.ctxd",
+        host: "gateway.low.ctxd",
         port: 80,
         protocol: http,
       }
@@ -126,69 +132,79 @@ configs:
       }
 
 #
+# Secrets
+#
+secrets:
+  git:
+    file: ../../secrets/high/git    
+  slack:
+    file: ../../secrets/high/slack    
+  
+#
 # List of Dockers
 #
 services:
+  #
+  # High Domain
+  #
+  high_import:
+    extends: 
+      file: ../high/ctxd.yml
+      service: high_import  
+    
+  high_export:
+    extends: 
+      file: ../high/ctxd.yml
+      service: high_export
 
   high_mqtt:
     extends: 
-      file: ./mono.yml
+      file: ../high/ctxd.yml
       service: high_mqtt
-    image: ctxd_high_mqtt:2.10.4
       
-  high_import:
-    extends:
-      file: ./mono.yml
-      service: high_import
-    image: in423xd_high_import:2.9.0
-      
-  high_export:
-    extends:
-      file: ./mono.yml
-      service: high_export
-    image: in423xd_high_export:2.9.0
   
-
-
+  #
+  # Gateway
+  #
   import_diode:
     extends: 
-      file: ./mono.yml
+      file: ../gateway/gateway.yml
       service: import_diode
-    image: in423xd_diode:2.9.0
-          
+  
   export_diode:
     extends: 
-      file: ./mono.yml
+      file: ../gateway/gateway.yml
       service: export_diode
-    image: in423xd_diode:2.9.0
-
+  
+  #
+  # Low Domain
+  #
+  low_import:
+    extends: 
+      file: ../low/ctxd.yml
+      service: low_import
+    
+  low_export:
+    extends: 
+      file: ../low/ctxd.yml
+      service: low_export
+  
   low_mqtt:
     extends: 
-      file: ./mono.yml
+      file: ../low/ctxd.yml
       service: low_mqtt
-    image: in423xd_low_mqtt:2.9.0
-      
-  low_import:
-    extends:
-      file: ./mono.yml
-      service: low_import
-    image: in423xd_low_import:2.9.0
-
-  low_export:
-    extends:
-      file: ./mono.yml
-      service: low_export
-    image: in423xd_low_export:2.9.0
-
+        
   low_emulators:
-    extends:
-      file: ./mono.yml
+    extends: 
+      file: ../low/ctxd.yml
       service: low_emulators
-    image: in423xd_low_emulators:2.9.0
-    
+  
 networks:
-  ctxd_low:
-    name: ctxd_low
   ctxd_high:
     name: ctxd_high
-    
+  ctxd_low:
+    name: ctxd_low
+ 
+
+
+

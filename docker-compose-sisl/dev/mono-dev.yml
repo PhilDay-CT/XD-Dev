@@ -130,6 +130,15 @@ configs:
         input:  {host: 'gateway.high.ctxd'},
         target: {host: 'export.low.ctxd'},
       }
+      
+#
+# Secrets
+#
+secrets:
+  git:
+    file: ../../secrets/high/git    
+  slack:
+    file: ../../secrets/high/slack    
 
 #
 # List of Dockers
