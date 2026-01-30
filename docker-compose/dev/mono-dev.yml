@@ -44,12 +44,10 @@ configs:
   status_high:
     content: |
       {
-        status: {
-          remote: {
-            host: "import.high.ctxd", 
-            port: 7776, 
-            channel: "ct-status"
-          }
+        remote: {
+          host: "import.high.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
         }
       }
 
@@ -120,7 +118,9 @@ configs:
     content: |
       {  
         input:  {host: 'gateway.low.ctxd'},
-        target: {host: 'import.high.ctxd'}
+        routes: {
+          default: 'http://import.high.ctxd:80/files'
+        }
       }
 
   # Export Diode Config
@@ -128,7 +128,9 @@ configs:
     content: |
       {  
         input:  {host: 'gateway.high.ctxd'},
-        target: {host: 'export.low.ctxd'},
+        routes: {
+          default: 'http://export.low.ctxd:80/files'
+        }
       }
 
 #
@@ -152,7 +154,6 @@ services:
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
       - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
-      - ${XD_DEV?}/images/gateway/diode/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
               
   export_diode:
     extends: 
@@ -161,7 +162,6 @@ services:
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
       - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
-      - ${XD_DEV?}/images/gateway/diode/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       
   low_mqtt:
     extends: 
@@ -169,8 +169,8 @@ services:
       service: low_mqtt
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
       - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       - ${XD_DEV?}/images/low/low_mqtt/config/mqtt/mqtt.conf:/etc/mosquitto/mosquitto.conf
       
@@ -180,12 +180,17 @@ services:
       service: low_import
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
       - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/low/low_base/sfjs:/opt/ct/base
-      - ${XD_DEV?}/images/low/low_import/sfjs:/opt/ct/init
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/ImportPipelines.sfjx:/opt/ct/init/ImportPipelines.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/MQTT_Monitor.sfjx:/opt/ct/init/MQTT_Monitor.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Low_Import.sfjs:/opt/ct/init/Low_Import.sfjs
 
   low_export:
     extends:
@@ -193,12 +198,17 @@ services:
       service: low_export
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
       - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/low/low_base/sfjs:/opt/ct/base
-      - ${XD_DEV?}/images/low/low_export/sfjs:/opt/ct/init
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/ExportPipelines.sfjx:/opt/ct/init/ExportPipelines.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Low_Export.sfjs:/opt/ct/init/Low_Export.sfjs
 
   low_emulators:
     extends:
@@ -207,11 +217,13 @@ services:
     volumes:
       - ${XD_DEV?}/src:/opt/ct/src
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/ct/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
       - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/low/low_emulators/sfjs:/opt/ct/init
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_emulators/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_emulators/sfjs/Low_Emulators.sfjs:/opt/ct/init/Low_Emulators.sfjs
 
   high_mqtt:
     extends: 
@@ -219,7 +231,6 @@ services:
       service: high_mqtt
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/high/high_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       - ${XD_DEV?}/images/high/high_mqtt/config/mqtt/mqtt.conf:/etc/mosquitto/mosquitto.conf
       
   high_import:
@@ -229,10 +240,19 @@ services:
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
       - ${XD_DEV?}/images/high/high_import/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/high/high_base/config/ct/high-config.sfjs:/opt/ct/init-config/high-config.sfjs
-      - ${XD_DEV?}/images/high/high_base/config/ct/high-config-local.sfjs:/opt/ct/init-config/high-config-local.sfjs
+      - ${XD_DEV?}/images/high/high_base/config/init-config/high-config.sfjs:/opt/ct/init-config/high-config.sfjs
+      - ${XD_DEV?}/images/high/high_base/config/init-config/high-config-local.sfjs:/opt/ct/init-config/high-config-local.sfjs
       - ${XD_DEV?}/images/high/high_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/high/high_import/sfjs:/opt/ct/init
+      - ${XD_DEV?}/images/high/high_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/ImportPipelines.sfjx:/opt/ct/init/ImportPipelines.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/SfjsAck.sfjx:/opt/ct/init/SfjsAck.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/Stats.sfjx:/opt/ct/init/Stats.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/Status.sfjx:/opt/ct/init/Status.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/High_Import.sfjs:/opt/ct/init/High_Import.sfjs
   
   high_export:
     extends:
@@ -240,15 +260,22 @@ services:
       service: high_export
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/high/high_base/config/ct/high-config.sfjs:/opt/ct/init-config/high-config.sfjs
-      - ${XD_DEV?}/images/high/high_base/config/ct/high-config-local.sfjs:/opt/ct/init-config/high-config-local.sfjs
+      - ${XD_DEV?}/images/high/high_base/config/init-config/high-config.sfjs:/opt/ct/init-config/high-config.sfjs
+      - ${XD_DEV?}/images/high/high_base/config/init-config/high-config-local.sfjs:/opt/ct/init-config/high-config-local.sfjs
       - ${XD_DEV?}/images/high/high_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/high/high_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/high/high_export/sfjs:/opt/ct/init
+      - ${XD_DEV?}/images/high/high_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/high/high_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/high/high_export/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/high/high_export/sfjs/ExportPipelines.sfjx:/opt/ct/init/ExportPipelines.sfjx
+      - ${XD_DEV?}/images/high/high_export/sfjs/GitConfig.sfjx:/opt/ct/init/GitConfig.sfjx
+      - ${XD_DEV?}/images/high/high_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/high/high_export/sfjs/High_Export.sfjs:/opt/ct/init/High_Export.sfjs
   
 networks:
   ctxd_low:
     name: ctxd_low
   ctxd_high:
     name: ctxd_high
+  ctxd_ops:
+    name: ctxd_ops
     

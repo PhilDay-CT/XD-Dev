@@ -28,6 +28,7 @@ in
         config_token: readstring('/run/secrets/git'),
         config_branch: $GIT.branch,
         webHook: {
+            enabled:  true,
             host:     "gitwh.high.ctxd",
             port:     32004,
             protocol: https,

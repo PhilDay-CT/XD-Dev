@@ -30,12 +30,10 @@ configs:
   status_high:
     content: |
       {
-        status: {
-          remote: {
-            host: "import.high.ctxd", 
-            port: 7776, 
-            channel: "ct-status"
-          }
+        remote: {
+          host: "import.high.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
         }
       }
 
@@ -93,12 +91,13 @@ services:
   # High Domain Import Service
   #    
   high_import:
-    image:  ghcr.io/configuredthings/ctxd_high_import:2.11.0
+    image:  ghcr.io/configuredthings/ctxd_high_import:2.13.0
     hostname: high_import
     networks:
       ctxd_high:
         aliases:
           - import.high.ctxd
+      ctxd_ops:    
     volumes:
       - ../../volumes/high/import/certs:/opt/ct/config/certs
     #secrets:
@@ -120,12 +119,13 @@ services:
   # High Domain Export Service
   #  
   high_export:
-    image:  ghcr.io/configuredthings/ctxd_high_export:2.11.0
+    image:  ghcr.io/configuredthings/ctxd_high_export:2.13.0
     hostname: high_export
     networks:
       ctxd_high:
         aliases:
           - config.high.ctxd
+      ctxd_ops:    
     volumes:
       - ../../volumes/high/export/certs:/opt/ct/config/certs
       - ../../volumes/high/export/keys:/opt/ct/config/keys
@@ -135,7 +135,7 @@ services:
       - git  
     configs:
       - source: status_high
-        target: /opt/ct/system/config/local.sfjs  
+        target: /opt/ct/system/config/status.sfjs  
       - source: import_high
         target: /opt/ct/config/import.sfjs
       - source: gateway_high
@@ -147,7 +147,7 @@ services:
   # High domain MQTT Server
   #
   high_mqtt:
-    image:  ghcr.io/configuredthings/ctxd_high_mqtt:2.11.0
+    image:  ghcr.io/configuredthings/ctxd_high_mqtt:2.13.0
     hostname: high_mqtt
     ports:
       - 31883:1883
@@ -157,12 +157,14 @@ services:
           - mqtt.high.ctxd
     configs:
       - source: status_high
-        target: /opt/ct/system/config/local.sfjs
+        target: /opt/ct/system/config/status.sfjs
 
 
 networks:
   ctxd_high:
     name: ctxd_high
+  ctxd_ops:
+    name: ctxd_ops  
 
 
 

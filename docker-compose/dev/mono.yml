@@ -17,7 +17,7 @@ configs:
   gateway_high:
     content: |
       {
-        host: "gateway.low.ctxd",
+        host: "gateway.high.ctxd",
         port: 80,
         protocol: http,
       }
@@ -44,12 +44,10 @@ configs:
   status_high:
     content: |
       {
-        status: {
-          remote: {
-            host: "import.high.ctxd", 
-            port: 7776, 
-            channel: "ct-status"
-          }
+        remote: {
+          host: "import.high.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
         }
       }
 
@@ -120,7 +118,9 @@ configs:
     content: |
       {  
         input:  {host: 'gateway.low.ctxd'},
-        target: {host: 'import.high.ctxd'}
+        routes: {
+          default: 'http://import.high.ctxd:80/files'
+        }
       }
 
   # Export Diode Config
@@ -128,7 +128,9 @@ configs:
     content: |
       {  
         input:  {host: 'gateway.high.ctxd'},
-        target: {host: 'export.low.ctxd'},
+        routes: {
+          default: 'http://export.low.ctxd:80/files'
+        }
       }
 
 #
@@ -201,6 +203,8 @@ services:
       service: low_emulators
   
 networks:
+  ctxd_ops:
+    name: ctxd_ops
   ctxd_high:
     name: ctxd_high
   ctxd_low:

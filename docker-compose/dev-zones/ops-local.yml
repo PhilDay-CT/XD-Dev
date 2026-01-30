@@ -31,6 +31,8 @@ services:
       file: ../ops/ops.yml
       service: console
     image: sfjs-console:2.32.0
+    volumes:
+      - ../../volumes/ops/console/ct-admin/git-zones.sfjs:/opt/ct/gui/git.sfjs
   
 networks:
   ctxd_ops:

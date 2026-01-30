@@ -1,0 +1,24 @@
+//
+// Edit this file to provide details of the
+// git repository that holds the signed configuration
+// data.  The account needs to have write access to
+// the repository
+//
+// Note that the token is provided via a secret in
+// the docker compose file
+//
+// For example:
+// {
+//    provider: "github",
+//    user: "CT-Admin",
+//    repo: "github.com/MyOrg/MyConfigRepo.git",
+//    branch: 'main',
+// }        
+//
+//
+{
+    provider: github,
+    user: 'PhilDay-CT',
+    repo: 'github.com/PhilDay-CT/XD-Dev-config.git',
+    branch: 'zones',
+}
