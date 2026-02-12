@@ -6,16 +6,16 @@ name: ctxd-ops
 
 configs:
   # Config details for an external git webhook server  
-  ext_webhook:
-    content: |
-      {
-        host: "gwhg.service.trade.configuredthings.com",
-      }
+  # ext_webhook:
+  #   content: |
+  #     {
+  #       host: "gwhg.service.trade.configuredthings.com",
+  #     }
 
 services:
 
   status:
-    image: ghcr.io/configuredthings/ctxd_ops_status:2.13.0
+    image: ghcr.io/configuredthings/ctxd_ops_status:2.13.1
     hostname: ops-status
     ports:
       - 32001:32001
@@ -23,9 +23,9 @@ services:
       - 32003:32003
       - 32004:32004
       - 32005:32005
-    configs:
-      - source: ext_webhook
-        target: /opt/ct/config/ext_webhook.sfjs
+    #configs:
+    #  - source: ext_webhook
+    #    target: /opt/ct/config/ext_webhook.sfjs
     volumes:
       - ../../volumes/ops/status/certs:/opt/ct/config/certs
       - ../../volumes/ops/status/ext_certs:/opt/ct/config/ext_certs

@@ -4,14 +4,6 @@
 #
 name: ctxd-ops
 
-configs:
-  # Config details for an external git webhook server  
-  ext_webhook:
-    content: |
-      {
-        host: "gwhg.service.trade.configuredthings.com",
-      }
-
 secrets:
   git:
     file: ../../secrets/ops/console/ct-admin/git    

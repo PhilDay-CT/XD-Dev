@@ -4,14 +4,6 @@
 #
 name: ctxd-ops
 
-configs:
-  # Config details for an external git webhook server  
-  ext_webhook:
-    content: |
-      {
-        host: "gwhg.service.trade.configuredthings.com",
-      }
-
 secrets:
   git:
     file: ../../secrets/ops/console/ct-admin/git    
@@ -24,13 +16,13 @@ services:
     extends: 
       file: ../ops/ops.yml
       service: status
-    image: ctxd_ops_status:2.13.0
+    image: ctxd_ops_status:2.13.1
 
   console:
     extends: 
       file: ../ops/ops.yml
       service: console
-    image: sfjs-console:2.32.0
+    image: sfjs-console:2.34.0
   
 networks:
   ctxd_ops:

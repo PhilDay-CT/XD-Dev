@@ -1,0 +1,84 @@
+name: "ctxd-2"
+
+#
+# Docker Compose file for a development version of 
+# the Cross Domain services in "Mono" mode using
+# local images
+#
+configs:
+
+  zone:
+    content: |
+      {
+        zone: 'Zone2'
+      }
+
+  # Low side of the Gateway (i.e. to High domain)
+  gateway_low:
+    content: |
+      {
+        host: "gateway.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+
+  # Low Side Export Web Server
+  export_low:
+    content: |
+      {
+        host: "export.low.ctxd",
+        port: 80,
+        protocol: http,
+      }
+    
+  # External MQTT server
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+services:
+
+  low_import:
+    extends:
+      file: ./ctxd.yml
+      service: low_import
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
+
+  low_export:
+    extends:
+      file: ./ctxd.yml
+      service: low_export
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
+
+  low_mqtt:
+    extends: 
+      file: ./ctxd.yml
+      service: low_mqtt
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
+    ports: !override
+      - 22883:1883
+      
+  low_emulators:
+    extends:
+      file: ./ctxd.yml
+      service: low_emulators
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
+
+networks:
+  ctxd_low:
+    name: ctxd_low_2
+    

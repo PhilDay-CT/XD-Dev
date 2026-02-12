@@ -10,7 +10,7 @@ configs:
   zone:
     content: |
       {
-        name: 'Zone1'
+        zone: 'Zone1'
       }
 
   # High side of the Gateway (i.e. to Low domain)
@@ -74,7 +74,8 @@ configs:
   # Thingsboard (Metrics)
   thingsboard_high:
     content: |
-      {enabled: false}
+      {enabled: false, host: null, port: null, protocol:http}
+
 
   # Pipeline Telemetry
   stats_high:
@@ -151,7 +152,7 @@ services:
     extends: 
       file: ../dev/mono.yml
       service: high_mqtt
-    image: ctxd_high_mqtt:2.13.0
+    image: ctxd_high_mqtt:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -160,7 +161,7 @@ services:
     extends:
       file: ../dev/mono.yml
       service: high_import
-    image: ctxd_high_import:2.13.0
+    image: ctxd_high_import:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -169,7 +170,7 @@ services:
     extends:
       file: ../dev/mono.yml
       service: high_export
-    image: ctxd_high_export:2.13.0
+    image: ctxd_high_export:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs
@@ -180,7 +181,7 @@ services:
     extends: 
       file: ../dev/mono.yml
       service: import_diode
-    image: ctxd_diode:2.13.0
+    image: ctxd_diode:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -189,7 +190,7 @@ services:
     extends: 
       file: ../dev/mono.yml
       service: export_diode
-    image: ctxd_diode:2.13.0
+    image: ctxd_diode:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -198,7 +199,7 @@ services:
     extends: 
       file: ../dev/mono.yml
       service: low_mqtt
-    image: ctxd_low_mqtt:2.13.0
+    image: ctxd_low_mqtt:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -207,7 +208,7 @@ services:
     extends:
       file: ../dev/mono.yml
       service: low_import
-    image: ctxd_low_import:2.13.0
+    image: ctxd_low_import:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -216,7 +217,7 @@ services:
     extends:
       file: ../dev/mono.yml
       service: low_export
-    image: ctxd_low_export:2.13.0
+    image: ctxd_low_export:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  
@@ -225,7 +226,7 @@ services:
     extends:
       file: ../dev/mono.yml
       service: low_emulators
-    image: ctxd_low_emulators:2.13.0
+    image: ctxd_low_emulators:2.13.1
     configs:
       - source: zone
         target: /opt/ct/system/config/zone.sfjs  

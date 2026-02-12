@@ -74,7 +74,7 @@ configs:
   # Thingsboard (Metrics)
   thingsboard_high:
     content: |
-      {enabled: false}
+        {enabled: false, host: null, port: null, protocol: http}
 
   # Pipeline Telemetry
   stats_high:

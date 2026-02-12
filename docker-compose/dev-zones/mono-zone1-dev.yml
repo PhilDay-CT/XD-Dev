@@ -13,6 +13,12 @@ name: "ctxd"
 # 
 configs:
 
+  zone:
+    content: |
+      {
+        zone: 'Zone1'
+      }
+  
   # High side of the Gateway (i.e. to Low domain)
   gateway_high:
     content: |
@@ -68,13 +74,14 @@ configs:
       {
         console: {enabled: true},
         slack:   {enabled: false},
-        mqtt:    {enabled: false},
+        mqtt:    {enabled: true},
       }
 
   # Thingsboard (Metrics)
   thingsboard_high:
     content: |
-      {enabled: false, host: null, port: null, protocol: http}
+      {enabled: false, host: null, port: null, protocol:http}
+
 
   # Pipeline Telemetry
   stats_high:
@@ -141,94 +148,14 @@ secrets:
     file: ../../secrets/high/git    
   slack:
     file: ../../secrets/high/slack    
-  thingsboard:
-    file: ../../secrets/high/thingsboard
+
 #
 # List of Dockers
 #     
 services:
-
-  import_diode:
-    extends: 
-      file: ./mono-local.yml
-      service: import_diode
-    volumes:
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
-              
-  export_diode:
-    extends: 
-      file: ./mono-local.yml
-      service: export_diode
-    volumes:
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
-      
-  low_mqtt:
-    extends: 
-      file: ./mono-local.yml
-      service: low_mqtt
-    volumes:
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
-      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_mqtt/config/mqtt/mqtt.conf:/etc/mosquitto/mosquitto.conf
-      
-  low_import:
-    extends:
-      file: ./mono-local.yml
-      service: low_import
-    volumes:
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
-      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
-      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
-      - ${XD_DEV?}/images/low/low_import/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
-      - ${XD_DEV?}/images/low/low_import/sfjs/ImportPipelines.sfjx:/opt/ct/init/ImportPipelines.sfjx
-      - ${XD_DEV?}/images/low/low_import/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
-      - ${XD_DEV?}/images/low/low_import/sfjs/MQTT_Monitor.sfjx:/opt/ct/init/MQTT_Monitor.sfjx
-      - ${XD_DEV?}/images/low/low_import/sfjs/Low_Import.sfjs:/opt/ct/init/Low_Import.sfjs
-
-  low_export:
-    extends:
-      file: ./mono-local.yml
-      service: low_export
-    volumes:
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
-      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
-      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
-      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/ExportPipelines.sfjx:/opt/ct/init/ExportPipelines.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/Low_Export.sfjs:/opt/ct/init/Low_Export.sfjs
-
-  low_emulators:
-    extends:
-      file: ./mono-local.yml
-      service: low_emulators
-    volumes:
-      - ${XD_DEV?}/src:/opt/ct/src
-      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
-      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
-      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
-      - ${XD_DEV?}/images/low/low_emulators/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
-      - ${XD_DEV?}/images/low/low_emulators/sfjs/Low_Emulators.sfjs:/opt/ct/init/Low_Emulators.sfjs
-
   high_mqtt:
     extends: 
-      file: ./mono-local.yml
+      file: ./mono-zone1-local.yml
       service: high_mqtt
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
@@ -236,7 +163,7 @@ services:
       
   high_import:
     extends:
-      file: ./mono-local.yml
+      file: ./mono-zone1-local.yml
       service: high_import
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
@@ -257,7 +184,7 @@ services:
   
   high_export:
     extends:
-      file: ./mono-local.yml
+      file: ./mono-zone1-local.yml
       service: high_export
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
@@ -272,6 +199,84 @@ services:
       - ${XD_DEV?}/images/high/high_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
       - ${XD_DEV?}/images/high/high_export/sfjs/High_Export.sfjs:/opt/ct/init/High_Export.sfjs
   
+  import_diode:
+    extends: 
+      file: ./mono-zone1-local.yml
+      service: import_diode
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
+              
+  export_diode:
+    extends: 
+      file: ./mono-zone1-local.yml
+      service: export_diode
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
+      
+  low_mqtt:
+    extends: 
+      file: ./mono-zone1-local.yml
+      service: low_mqtt
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
+      - ${XD_DEV?}/images/low/low_mqtt/config/mqtt/mqtt.conf:/etc/mosquitto/mosquitto.conf
+      
+  low_import:
+    extends:
+      file: ./mono-zone1-local.yml
+      service: low_import
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
+      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/ImportPipelines.sfjx:/opt/ct/init/ImportPipelines.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/MQTT_Monitor.sfjx:/opt/ct/init/MQTT_Monitor.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Low_Import.sfjs:/opt/ct/init/Low_Import.sfjs
+
+  low_export:
+    extends:
+      file: ./mono-zone1-local.yml
+      service: low_export
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
+      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/ExportPipelines.sfjx:/opt/ct/init/ExportPipelines.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/Low_Export.sfjs:/opt/ct/init/Low_Export.sfjs
+
+  low_emulators:
+    extends:
+      file: ./mono-zone1-local.yml
+      service: low_emulators
+    volumes:
+      - ${XD_DEV?}/src:/opt/ct/src
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_emulators/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_emulators/sfjs/Low_Emulators.sfjs:/opt/ct/init/Low_Emulators.sfjs
+
 networks:
   ctxd_low:
     name: ctxd_low

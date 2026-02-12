@@ -7,6 +7,12 @@ name: "ctxd"
 #
 configs:
 
+  zone:
+    content: |
+      {
+        name: 'Zone1'
+      }
+
   # High side of the Gateway (i.e. to Low domain)
   gateway_high:
     content: |
@@ -62,26 +68,19 @@ configs:
       {
         console: {enabled: true},
         slack:   {enabled: false},
-        mqtt:    {enabled: true},
+        mqtt:    {enabled: false},
       }
 
   # Thingsboard (Metrics)
   thingsboard_high:
     content: |
-      {enabled: false, host: null, port: null, protocol: http}
-
+      {enabled: false}
 
   # Pipeline Telemetry
   stats_high:
     content: |
       {
-        thingsboard: {
-          enabled: true, 
-          host: "thingsboard.cloud", 
-          protocol: https, 
-          port: 443, 
-          token: readstring('/run/secrets/thingsboard')
-        }
+        thingsboard: {enabled: false}
       }    
 
   # Low side of the Gateway (i.e. to High domain)
@@ -140,10 +139,8 @@ secrets:
   git:
     file: ../../secrets/high/git    
   slack:
-    file: ../../secrets/high/slack
-  thingsboard:
-    file: ../../secrets/high/thingsboard
-        
+    file: ../../secrets/high/slack    
+
 #
 # List of Dockers
 #
@@ -154,62 +151,83 @@ services:
       file: ./mono.yml
       service: high_mqtt
     image: ctxd_high_mqtt:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
       
   high_import:
     extends:
       file: ./mono.yml
       service: high_import
     image: ctxd_high_import:2.13.1
-    secrets:
-      - thingsboard
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
       
   high_export:
     extends:
       file: ./mono.yml
       service: high_export
     image: ctxd_high_export:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
   
-
-
   import_diode:
     extends: 
       file: ./mono.yml
       service: import_diode
     image: ctxd_diode:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
           
   export_diode:
     extends: 
       file: ./mono.yml
       service: export_diode
     image: ctxd_diode:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
 
   low_mqtt:
     extends: 
       file: ./mono.yml
       service: low_mqtt
     image: ctxd_low_mqtt:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
       
   low_import:
     extends:
       file: ./mono.yml
       service: low_import
     image: ctxd_low_import:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
 
   low_export:
     extends:
       file: ./mono.yml
       service: low_export
     image: ctxd_low_export:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
 
   low_emulators:
     extends:
       file: ./mono.yml
       service: low_emulators
     image: ctxd_low_emulators:2.13.1
+    configs:
+      - source: zone
+        target: /opt/ct/system/config/zone.sfjs  
 
 networks:
-  ctxd_ops:
-    name: ctxd_ops
   ctxd_low:
     name: ctxd_low
   ctxd_high:
