@@ -17,8 +17,8 @@ export GID=$(id -g);
     echo "+---------------------+"
     echo "| Generating high PKI |"
     echo "+---------------------+"
-    mkdir -p high/certs
-    export PKI_ENV=high; docker-compose up
+    mkdir -p ops/certs
+    export PKI_ENV=ops; docker-compose up
 
     echo
     echo "+---------------------+"
@@ -55,13 +55,13 @@ echo "+-----------------------------+"
 
 echo "High:Import ..."
 CONFIG=volumes/high/import
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-STATUS_WRITER_CA=ctxd-high-status-writer-ca
-STATUS=status.high.ctxd
-ALERTS_WRITER_CA=ctxd-high-alerts-writer-ca
-ALERTS=alerts.high.ctxd
+CERTS=./PKI/ops/certs
+ROOT_CA=ctxd-ops-root-ca
+INTER_CA=ctxd-ops-intermediate-ca
+STATUS_WRITER_CA=ctxd-ops-status-writer-ca
+STATUS=status.ops.ctxd
+ALERTS_WRITER_CA=ctxd-ops-alerts-writer-ca
+ALERTS=alerts.ops.ctxd
 HOST=import.high.ctxd
 
 mkdir -p ${CONFIG}
@@ -116,12 +116,12 @@ cp -f ${CERTS}/${ROOT_CA}/${ADMINS_CA}/${KEYS}/${KEYS}.ecdh.pem\
 #
 # Read access to High GitWebHook 
 #
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-READER_CA=ctxd-high-gitwh-reader-ca
+CERTS=./PKI/ops/certs
+ROOT_CA=ctxd-ops-root-ca
+INTER_CA=ctxd-ops-intermediate-ca
+READER_CA=ctxd-ops-gitwh-reader-ca
 HOST=export.high.ctxd
-GWH=gitwh.high.ctxd
+GWH=gitwh.ops.ctxd
 
 mkdir -p ${CONFIG}/certs/gitwh
 cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${READER_CA}/${HOST}/${HOST}.crt\
@@ -143,14 +143,14 @@ echo "Ops:Status/Alerts ..."
 # Status High Import to write to it and the Console to read from it
 #
 CONFIG=volumes/ops/status/certs
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-S_WRITER_CA=ctxd-high-status-writer-ca
-S_READER_CA=ctxd-high-status-reader-ca
-S_HOST=status.high.ctxd
-A_WRITER_CA=ctxd-high-alerts-writer-ca
-A_HOST=alerts.high.ctxd
+CERTS=./PKI/ops/certs
+ROOT_CA=ctxd-ops-root-ca
+INTER_CA=ctxd-ops-intermediate-ca
+S_WRITER_CA=ctxd-ops-status-writer-ca
+S_READER_CA=ctxd-ops-status-reader-ca
+S_HOST=status.ops.ctxd
+A_WRITER_CA=ctxd-ops-alerts-writer-ca
+A_HOST=alerts.ops.ctxd
 
 mkdir -p ${CONFIG}/status
 cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${S_WRITER_CA}/${S_WRITER_CA}.bundle.crt \
@@ -179,12 +179,12 @@ find ${CONFIG} -type f -exec chmod o+r {} \;
 #
 echo "Ops:GitWebHook ..."
 CONFIG=volumes/ops/status/certs
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-WRITER_CA=ctxd-high-gitwh-writer-ca
-READER_CA=ctxd-high-gitwh-reader-ca
-HOST=gitwh.high.ctxd
+CERTS=./PKI/ops/certs
+ROOT_CA=ctxd-ops-root-ca
+INTER_CA=ctxd-ops-intermediate-ca
+WRITER_CA=ctxd-ops-gitwh-writer-ca
+READER_CA=ctxd-ops-gitwh-reader-ca
+HOST=gitwh.ops.ctxd
 
 
 mkdir -p ${CONFIG}/gitwh
@@ -213,27 +213,27 @@ U_ROOT_CA=ctxd-users-root-ca
 U_ADMINS_CA=ctxd-users-admins-ca
 
 # Status PKI
-S_CERTS=./PKI/high/certs
-S_ROOT_CA=ctxd-high-root-ca
-S_INTER_CA=ctxd-high-intermediate-ca
-S_READER_CA=ctxd-high-status-reader-ca
-HOST=console.high.ctxd 
-STATUS=status.high.ctxd
+S_CERTS=./PKI/ops/certs
+S_ROOT_CA=ctxd-ops-root-ca
+S_INTER_CA=ctxd-ops-intermediate-ca
+S_READER_CA=ctxd-ops-status-reader-ca
+HOST=console.ops.ctxd 
+STATUS=status.ops.ctxd
 
 # Alerts PKI
-A_CERTS=./PKI/high/certs
-A_ROOT_CA=ctxd-high-root-ca
-A_INTER_CA=ctxd-high-intermediate-ca
-A_WRITER_CA=ctxd-high-alerts-writer-ca
-HOST=console.high.ctxd 
-ALERTS=alerts.high.ctxd 
+A_CERTS=./PKI/ops/certs
+A_ROOT_CA=ctxd-ops-root-ca
+A_INTER_CA=ctxd-ops-intermediate-ca
+A_WRITER_CA=ctxd-ops-alerts-writer-ca
+HOST=console.ops.ctxd 
+ALERTS=alerts.ops.ctxd 
 
 # Git Webhook PKI
-G_CERTS=./PKI/high/certs
-G_ROOT_CA=ctxd-high-root-ca
-G_INTER_CA=ctxd-high-intermediate-ca
-G_WRITER_CA=ctxd-high-gitwh-writer-ca
-GWH=gitwh.high.ctxd
+G_CERTS=./PKI/ops/certs
+G_ROOT_CA=ctxd-ops-root-ca
+G_INTER_CA=ctxd-ops-intermediate-ca
+G_WRITER_CA=ctxd-ops-gitwh-writer-ca
+GWH=gitwh.ops.ctxd
 
 # Get the list of users
 USERS=""

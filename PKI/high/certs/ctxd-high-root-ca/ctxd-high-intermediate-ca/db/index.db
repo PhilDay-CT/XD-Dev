@@ -1,8 +1,0 @@
-V	350712122957Z		01	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/CN=status.high.ctxd
-V	350712122957Z		02	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/OU=Status/OU=Writer/CN=ctxd-high-status-writer-ca
-V	350712122957Z		03	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/OU=Status/OU=Reader/CN=ctxd-high-status-reader-ca
-V	350712122957Z		04	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/CN=alerts.high.ctxd
-V	350712122957Z		05	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/OU=Alerts/OU=Writer/CN=ctxd-high-alerts-writer-ca
-V	350712122957Z		06	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/CN=gitwh.high.ctxd
-V	350712122957Z		07	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/OU=Gitwh/OU=Writer/CN=ctxd-high-gitwh-writer-ca
-V	350712122957Z		08	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=High/OU=Gitwh/OU=Reader/CN=ctxd-high-gitwh-reader-ca

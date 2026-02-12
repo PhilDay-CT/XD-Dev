@@ -41,7 +41,7 @@ services:
   # Low Domain Import Service
   #    
   low_import:
-    image: ghcr.io/configuredthings/ctxd_low_import:2.13.1
+    image: ghcr.io/configuredthings/ctxd_low_import:2.13.2
     hostname: low_import
     networks:
       - ctxd_low
@@ -55,7 +55,7 @@ services:
   # Low Domain Export Service
   #  
   low_export:
-    image:  ghcr.io/configuredthings/ctxd_low_export:2.13.1
+    image:  ghcr.io/configuredthings/ctxd_low_export:2.13.2
     hostname: low_export
     networks:
       ctxd_low:
@@ -74,7 +74,7 @@ services:
   # Low Domain MQTT Service
   #
   low_mqtt:
-    image: ghcr.io/configuredthings/ctxd_low_mqtt:2.13.1
+    image: ghcr.io/configuredthings/ctxd_low_mqtt:2.13.2
     hostname: low_mqtt
     ports:
       - 21883:1883
@@ -90,7 +90,7 @@ services:
   # Low Domain Device Emulator Service
   #
   low_emulators:
-    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.13.1
+    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.13.2
     hostname: low_emulators
     networks:
       - ctxd_low
