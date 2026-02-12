@@ -45,7 +45,7 @@ services:
   # Gateway
   #
   import_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:2.13.2
+    image:  ghcr.io/configuredthings/ctxd_diode:2.13.1
     hostname: gateway_import
     networks:
       ctxd_low:
@@ -60,7 +60,7 @@ services:
 
           
   export_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:2.13.2
+    image:  ghcr.io/configuredthings/ctxd_diode:2.13.1
     hostname: gateway_export
     networks:
       ctxd_high:

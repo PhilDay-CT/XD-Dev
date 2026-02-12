@@ -113,7 +113,7 @@ services:
   # High Domain Import Service
   #    
   high_import:
-    image:  ghcr.io/configuredthings/ctxd_high_import:2.13.2
+    image:  ghcr.io/configuredthings/ctxd_high_import:2.13.1
     hostname: high_import
     networks:
       ctxd_high:
@@ -142,7 +142,7 @@ services:
   # High Domain Export Service
   #  
   high_export:
-    image:  ghcr.io/configuredthings/ctxd_high_export:2.13.2
+    image:  ghcr.io/configuredthings/ctxd_high_export:2.13.1
     hostname: high_export
     networks:
       ctxd_high:
@@ -170,7 +170,7 @@ services:
   # High domain MQTT Server
   #
   high_mqtt:
-    image:  ghcr.io/configuredthings/ctxd_high_mqtt:2.13.2
+    image:  ghcr.io/configuredthings/ctxd_high_mqtt:2.13.1
     hostname: high_mqtt
     ports:
       - 31883:1883

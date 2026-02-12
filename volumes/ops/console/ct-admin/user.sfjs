@@ -4,5 +4,5 @@
 //
 {
     name: "ct-admin",
-    password: readstring('/run/secrets/user'),
+    password: readstring('/run/secrets/user')
 }

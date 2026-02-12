@@ -1,0 +1,47 @@
+# TLS server certificate request
+
+[req]
+default_bits            = 4096
+encrypt_key             = no
+default_md              = sha256
+utf8                    = yes
+string_mask             = utf8only
+prompt                  = no
+distinguished_name      = server_dn
+req_extensions          = server_ext
+
+[ server_dn ]
+countryName             = "UK"
+organizationName        = "Configured Things Ltd."
+0.organizationalUnitName = "ctxd"
+1.organizationalUnitName = "High"
+2.organizationalUnitName = "Status"
+3.organizationalUnitName = "Writer"
+
+commonName              = "import.high.ctxd"
+
+
+
+[server_ext]
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = clientAuth,serverAuth
+keyUsage                = critical,digitalSignature,keyEncipherment
+subjectKeyIdentifier    = hash
+subjectAltName          = @alt_names
+
+[alt_names]
+DNS.0 = "import.high.ctxd"
+
+
+[name_constraints]
+permitted;DNS.0="ctxd"
+permitted;DNS.1=".ctxd"
+permitted;DNS.2=".eu-west-2.compute.amazonaws.com"
+
+[ocsp_ext]
+authorityKeyIdentifier  = keyid:always
+basicConstraints        = critical,CA:false
+extendedKeyUsage        = OCSPSigning
+noCheck                 = yes
+keyUsage                = critical,digitalSignature
+subjectKeyIdentifier    = hash

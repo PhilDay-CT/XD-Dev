@@ -1,0 +1,7 @@
+V	360210130151Z		01	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/CN=status.ops.ctxd
+V	360210130151Z		02	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/OU=Status/OU=Writer/CN=ctxd-ops-status-writer-ca
+V	360210130151Z		03	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/OU=Status/OU=Reader/CN=ctxd-ops-status-reader-ca
+V	360210130151Z		04	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/CN=alerts.ops.ctxd
+V	360210130152Z		05	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/OU=Alerts/OU=Writer/CN=ctxd-ops-alerts-writer-ca
+V	360210130152Z		06	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/CN=gitwh.ops.ctxd
+V	360210130152Z		07	unknown	/C=UK/O=Configured Things Ltd./OU=ctxd/OU=Ops/OU=Gitwh/OU=Writer/CN=ctxd-ops-gitwh-writer-ca

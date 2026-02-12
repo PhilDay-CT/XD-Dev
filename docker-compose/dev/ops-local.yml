@@ -16,7 +16,7 @@ services:
     extends: 
       file: ../ops/ops.yml
       service: status
-    image: ctxd_ops_status:2.13.2
+    image: ctxd_ops_status:2.13.1
 
   console:
     extends: 
