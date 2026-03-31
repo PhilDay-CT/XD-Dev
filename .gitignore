@@ -1,1 +1,5 @@
 secrets
+PKI/opt/certs
+PKI/users/certs
+volumes/**/certs
+volumes/**/keys

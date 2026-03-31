@@ -2,16 +2,16 @@ name: "ctxd"
 
 #
 # Docker Compose file for a development version of 
-# the Cross Domain services in "Mono" mode using
-# local images
+# the Cross Domain services in "Mono" mode.
 #
+# This adds additional mount points to each service
+# defined in docker-compose-mono-local to support
+# development inside the containers 
+#
+# env var XD_DEV? must be set to point to a clone of
+# the source repo of CrossDomainDocker
+# 
 configs:
-
-  zone:
-    content: |
-      {
-        zone: 'Zone1'
-      }
 
   # High side of the Gateway (i.e. to Low domain)
   gateway_high:
@@ -86,8 +86,7 @@ configs:
   # Thingsboard (Metrics)
   thingsboard_high:
     content: |
-      {enabled: false, host: null, port: null, protocol:http}
-
+      {enabled: false, host: null, port: null, protocol: http}
 
   # Pipeline Telemetry
   stats_high:
@@ -126,7 +125,7 @@ configs:
         protocol: http,
       }
 
-  # MM to connect to for configuration
+  # Low domain config source
   config_low:
     content: |
       {
@@ -136,7 +135,7 @@ configs:
         channel: 'application',
       }
 
-  # MM to send status to
+  # Low Domain Status Server
   status_low:
     content: |
       {
@@ -146,7 +145,7 @@ configs:
           channel: "ct-status"
         }
       }
-    
+
   # Import Diode Config
   import_diode:
     content: |
@@ -175,71 +174,55 @@ secrets:
     file: ../../secrets/high/git    
   slack:
     file: ../../secrets/high/slack    
-
+  thingsboard:
+    file: ../../secrets/high/thingsboard
 #
 # List of Dockers
-#
+#     
 services:
 
-  high_mqtt:
-    extends: 
-      file: ../high/zone1.yml
-      service: high_mqtt
-    image: ctxd_high_mqtt:2.13.4
-      
-  high_import:
-    extends:
-      file: ../high/zone1.yml
-      service: high_import
-    image: ctxd_high_import:2.13.4
-      
-  high_export:
-    extends:
-      file: ../high/zone1.yml
-      service: high_export
-    image: ctxd_high_export:2.13.4
-    
   import_diode:
     extends: 
-      file: ../gateway/zone1.yml
+      file: ./mono-local.yml
       service: import_diode
-    image: ctxd_diode:2.13.4
-          
-  export_diode:
-    extends: 
-      file: ../gateway/zone1.yml
-      service: export_diode
-    image: ctxd_diode:2.13.4
-  
-  low_mqtt:
-    extends: 
-      file: ../low/zone1.yml
-      service: low_mqtt
-    image: ctxd_low_mqtt:2.13.4
-      
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/gateway/diode/sfjs:/opt/ct/init
+              
   low_import:
     extends:
-      file: ../low/zone1.yml
+      file: ./mono-local.yml
       service: low_import
-    image: ctxd_low_import:2.13.4
+    volumes:
+      - ${XD_DEV?}/node_modules:/opt/ct/node_modules
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
+      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
+      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
+      - ${XD_DEV?}/images/low/low_base/templates:/opt/ct/templates
+      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
+      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/ImportPipelines.sfjx:/opt/ct/init/ImportPipelines.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/MQTT_Monitor.sfjx:/opt/ct/init/MQTT_Monitor.sfjx
+      - ${XD_DEV?}/images/low/low_import/sfjs/Low_Import.sfjs:/opt/ct/init/Low_Import.sfjs
 
   low_export:
     extends:
-      file: ../low/zone1.yml
+      file: ./mono-local.yml
       service: low_export
-    image: ctxd_low_export:2.13.4
-
-  low_emulators:
+    
+  high_import:
     extends:
-      file: ../low/zone1.yml
-      service: low_emulators
-    image: ctxd_low_emulators:2.13.4
-
+      file: ./mono-local.yml
+      service: high_import
+    
+  
 networks:
   ctxd_low:
-    name: ctxd_low_1
+    name: ctxd_low
   ctxd_high:
-    name: ctxd_high_1
+    name: ctxd_high
   ctxd_ops:
     name: ctxd_ops
     

@@ -17,8 +17,8 @@ export GID=$(id -g);
     echo "+---------------------+"
     echo "| Generating high PKI |"
     echo "+---------------------+"
-    mkdir -p high/certs
-    export PKI_ENV=high; docker-compose up
+    mkdir -p ops/certs
+    export PKI_ENV=ops; docker-compose up
 
     echo
     echo "+---------------------+"
@@ -42,46 +42,73 @@ export GID=$(id -g);
 # #########################
 
 echo
-echo "+-----------------------------+"
-echo "| Copying PKI files to config |"
-echo "+-----------------------------+"
-    
+echo "+------------------------------+"
+echo "| Copying PKI files to volumes |"
+echo "+------------------------------+"
+
 
 # #########################
 # 
-# PKI for High Import to send status to the status MM
+# PKI for High Import to send status and alerts to the status MM
 #
 # #########################
 
 echo "High:Import ..."
-CONFIG=volumes/high/import
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-STATUS_WRITER_CA=ctxd-high-status-writer-ca
-STATUS=status.high.ctxd
-ALERTS_WRITER_CA=ctxd-high-alerts-writer-ca
-ALERTS=alerts.high.ctxd
-HOST=import.high.ctxd
+OPS_CERTS=./PKI/ops/certs
+OPS_ROOT_CA=${OPS_CERTS}/root-ca.ops.ctxd
+OPS_INTER_CA=${OPS_ROOT_CA}/intermediate-ca.ops.ctxd
+OPS_STATUS_WRITER_CA=${OPS_INTER_CA}/writer-ca.status.ops.ctxd
+OPS_STATUS_HOST=status.ops.ctxd
+OPS_ALERTS_WRITER_CA=${OPS_INTER_CA}/writer-ca.alerts.ops.ctxd
+OPS_ALERTS_HOST=alerts.ops.ctxd
 
-mkdir -p ${CONFIG}
+#
+# Find which zones we have by looking for all the client certs
+# we have for the status writer CA
+#
+ZONES=""    
+DIR=${OPS_STATUS_WRITER_CA}
+for ZoneDir in `find $DIR -maxdepth 1 -type d -name "import*"`; do
+    ZONE=${ZoneDir##${DIR}/}
+    ZONES="${ZONES} ${ZONE}"
+done
 
-# Status
-mkdir -p ${CONFIG}/certs/status
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${STATUS_WRITER_CA}/${HOST}/${HOST}.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${STATUS_WRITER_CA}/${HOST}/${HOST}.pem \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${STATUS}/${STATUS}.bundle.crt \
-      ${CONFIG}/certs/status
 
-# Alerts
-mkdir -p ${CONFIG}/certs/alerts
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${ALERTS_WRITER_CA}/${HOST}/${HOST}.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${ALERTS_WRITER_CA}/${HOST}/${HOST}.pem \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${ALERTS}/${ALERTS}.bundle.crt \
-      ${CONFIG}/certs/alerts
+for HOST in ${ZONES}; do
 
-find ${CONFIG} -type d -exec chmod o+rx {} \;
-find ${CONFIG} -type f -exec chmod o+r {} \;
+    # We need to make from the client hoist name to a volume
+    #    import.high.ctxd         volumes/high/import
+    #    import.high.zone1.ctxd   volumes/zone1/high/import
+    
+    # Strip the trailing '.ctxd'
+    V=${HOST%%.ctxd}
+    # Use a bit of sed magic and tr to reverse the path
+    CONFIG=volumes/`echo $V | sed 's/\./\n/g' | tac | sed ':a; $!{N;ba};s/\n/\//g'`
+    echo "    $HOST $CONFIG"
+
+    mkdir -p ${CONFIG}
+    rm -rf ${CONFIG}/certs
+
+    # Status
+    mkdir -p ${CONFIG}/certs/status
+    cp -f \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.crt \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.pem \
+        ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.bundle.crt \
+        ${CONFIG}/certs/status
+
+    # Alerts
+    mkdir -p ${CONFIG}/certs/alerts
+    cp -f \
+        ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.crt \
+        ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.pem \
+        ${OPS_INTER_CA}/${OPS_ALERTS_HOST}/${OPS_ALERTS_HOST}.bundle.crt \
+        ${CONFIG}/certs/alerts
+
+    find ${CONFIG} -type d -exec chmod o+rx {} \;
+    find ${CONFIG} -type f -exec chmod o+r {} \;
+
+done
 
 # #########################
 #
@@ -91,108 +118,197 @@ find ${CONFIG} -type f -exec chmod o+r {} \;
 echo "High:Export ..."
 
 #
-# System crypto keys and users CA for signature checking
+# Read access to High GitWebHook 
 #
-CONFIG=volumes/high/export
-CERTS=./PKI/users/certs
-ROOT_CA=ctxd-users-root-ca
-ADMINS_CA=ctxd-users-admins-ca
-KEYS=SystemCrypto
+OPS_CERTS=./PKI/ops/certs
+OPS_ROOT_CA=${OPS_CERTS}/root-ca.ops.ctxd
+OPS_INTER_CA=${OPS_ROOT_CA}/intermediate-ca.ops.ctxd
+OPS_STATUS_WRITER_CA=${OPS_INTER_CA}/writer-ca.status.ops.ctxd
+OPS_STATUS_HOST=status.ops.ctxd
+OPS_GWH_READER_CA=${OPS_INTER_CA}/reader-ca.gitwh.ops.ctxd
+OPS_GWH_HOST=gitwh.ops.ctxd
 
-mkdir -p ${CONFIG}
+#
+# Find which zones we have by looking for all the client certs
+# we have for the status writer CA
+#
+ZONES=""    
+DIR=${OPS_STATUS_WRITER_CA}
+for ZoneDir in `find $DIR -maxdepth 1 -type d -name "export*"`; do
+    ZONE=${ZoneDir##${DIR}/}
+    ZONES="${ZONES} ${ZONE}"
+done
 
-# Config files 
-cp -rn templates/high/export/* ${CONFIG}
 
-mkdir -p ${CONFIG}/certs/users
-cp -f ${CERTS}/${ROOT_CA}/${ADMINS_CA}/${ADMINS_CA}.crt\
-      ${CONFIG}/certs/users
-      
-mkdir -p ${CONFIG}/keys
-cp -f ${CERTS}/${ROOT_CA}/${ADMINS_CA}/${KEYS}/${KEYS}.ecdh.pem\
-      ${CERTS}/${ROOT_CA}/${ADMINS_CA}/${KEYS}/${KEYS}.ecdh.pub.pem\
-      ${CONFIG}/keys
+for HOST in ${ZONES}; do
+
+    # We need to make from the client host name to a volume
+    #    export.high.ctxd         volumes/high/export
+    #    export.high.zone1.ctxd   volumes/zone1/high/export
+    
+    # Strip the trailing '.ctxd'
+    V=${HOST%%.ctxd}
+    # Use a bit of sed magic and tr to reverse the path
+    CONFIG=volumes/`echo $V | sed 's/\./\n/g' | tac | sed ':a; $!{N;ba};s/\n/\//g'`
+    ZONE_VOLS="${ZONE_VOLS} ${CONFIG}"
+
+    echo "   $HOST $CONFIG"
+    
+    rm -rf ${CONFIG}/certs ${CONFIG}/keys
+    
+    # Status
+    mkdir -p ${CONFIG}/certs/status
+    cp -f \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.crt \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.pem \
+        ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.bundle.crt \
+        ${CONFIG}/certs/status
+
+    # Git Web Hook
+    mkdir -p ${CONFIG}/certs/gitwh
+    cp -f \
+        ${OPS_GWH_READER_CA}/${HOST}/${HOST}.crt\
+        ${OPS_GWH_READER_CA}/${HOST}/${HOST}.pem\
+        ${OPS_INTER_CA}/${OPS_GWH_HOST}/${OPS_GWH_HOST}.bundle.crt\
+        ${CONFIG}/certs/gitwh
+
+    #
+    # System crypto keys and users CA for signature checking
+    #
+    USER_CERTS=./PKI/users/certs
+    USER_ROOT_CA=ctxd-users-root-ca
+    ADMINS_CA=ctxd-users-admins-ca
+    KEYS=SystemCrypto
+
+    mkdir -p ${CONFIG}
+
+    # Config files 
+    cp -rn templates/high/export/* ${CONFIG}
+
+    mkdir -p ${CONFIG}/certs/users
+    cp -f ${USER_CERTS}/${USER_ROOT_CA}/${ADMINS_CA}/${ADMINS_CA}.crt\
+        ${CONFIG}/certs/users
+        
+    mkdir -p ${CONFIG}/keys
+    cp -f ${USER_CERTS}/${USER_ROOT_CA}/${ADMINS_CA}/${KEYS}/${KEYS}.ecdh.pem\
+        ${USER_CERTS}/${USER_ROOT_CA}/${ADMINS_CA}/${KEYS}/${KEYS}.ecdh.pub.pem\
+        ${CONFIG}/keys
+
+    find ${CONFIG} -type d -exec chmod o+rx {} \;
+    find ${CONFIG} -type f -exec chmod o+r {} \;
+done
+
+# #########################
+#
+# PKI for High MQTT
+#
+# #########################
+echo "High:MQTT ..."
 
 #
 # Read access to High GitWebHook 
 #
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-READER_CA=ctxd-high-gitwh-reader-ca
-HOST=export.high.ctxd
-GWH=gitwh.high.ctxd
+OPS_CERTS=./PKI/ops/certs
+OPS_ROOT_CA=${OPS_CERTS}/root-ca.ops.ctxd
+OPS_INTER_CA=${OPS_ROOT_CA}/intermediate-ca.ops.ctxd
+OPS_STATUS_WRITER_CA=${OPS_INTER_CA}/writer-ca.status.ops.ctxd
+OPS_STATUS_HOST=status.ops.ctxd
 
-mkdir -p ${CONFIG}/certs/gitwh
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${READER_CA}/${HOST}/${HOST}.crt\
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${READER_CA}/${HOST}/${HOST}.pem\
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${GWH}/${GWH}.bundle.crt\
-      ${CONFIG}/certs/gitwh
+#
+# Find which zones we have by looking for all the client certs
+# we have for the status writer CA
+#
+ZONES=""    
+DIR=${OPS_STATUS_WRITER_CA}
+for ZoneDir in `find $DIR -maxdepth 1 -type d -name "mqtt*"`; do
+    ZONE=${ZoneDir##${DIR}/}
+    ZONES="${ZONES} ${ZONE}"
+done
 
-find ${CONFIG} -type d -exec chmod o+rx {} \;
-find ${CONFIG} -type f -exec chmod o+r {} \;
+
+for HOST in ${ZONES}; do
+
+    # We need to make from the client host name to a volume
+    #    mqtt.high.ctxd         volumes/high/mqtt
+    #    mqtt.high.zone1.ctxd   volumes/zone1/high/mqtt
+    
+    # Strip the trailing '.ctxd'
+    V=${HOST%%.ctxd}
+    # Use a bit of sed magic and tr to reverse the path
+    CONFIG=volumes/`echo $V | sed 's/\./\n/g' | tac | sed ':a; $!{N;ba};s/\n/\//g'`
+    ZONE_VOLS="${ZONE_VOLS} ${CONFIG}"
+
+    echo "   $HOST $CONFIG"
+    
+    rm -rf ${CONFIG}/certs ${CONFIG}/keys
+    
+    # Status
+    mkdir -p ${CONFIG}/certs/status
+    cp -f \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.crt \
+        ${OPS_STATUS_WRITER_CA}/${HOST}/${HOST}.pem \
+        ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.bundle.crt \
+        ${CONFIG}/certs/status
+
+    find ${CONFIG} -type d -exec chmod o+rx {} \;
+    find ${CONFIG} -type f -exec chmod o+r {} \;
+done
 
 # #########################
 # 
 # PKI for Ops Status /Alert MM
 #
 # #########################
-echo "Ops:Status/Alerts ..."
+echo "Ops:Status/Alerts/GitWebHook ..."
 
 #
 # Status High Import to write to it and the Console to read from it
 #
+OPS_CERTS=./PKI/ops/certs
+OPS_ROOT_CA=${OPS_CERTS}/root-ca.ops.ctxd
+OPS_INTER_CA=${OPS_ROOT_CA}/intermediate-ca.ops.ctxd
+
+OPS_STATUS_WRITER=writer-ca.status.ops.ctxd
+OPS_STATUS_WRITER_CA=${OPS_INTER_CA}/${OPS_STATUS_WRITER}
+OPS_STATUS_READER=reader-ca.status.ops.ctxd
+OPS_STATUS_READER_CA=${OPS_INTER_CA}/${OPS_STATUS_READER}
+OPS_STATUS_HOST=status.ops.ctxd
+
+OPS_ALERTS_WRITER=writer-ca.alerts.ops.ctxd
+OPS_ALERTS_WRITER_CA=${OPS_INTER_CA}/${OPS_ALERTS_WRITER}
+OPS_ALERTS_HOST=alerts.ops.ctxd
+
+OPS_GWH_WRITER=writer-ca.gitwh.ops.ctxd
+OPS_GWH_WRITER_CA=${OPS_INTER_CA}/${OPS_GWH_WRITER}
+OPS_GWH_READER=reader-ca.gitwh.ops.ctxd
+OPS_GWH_READER_CA=${OPS_INTER_CA}/${OPS_GWH_READER}
+OPS_GWH_HOST=gitwh.ops.ctxd
+
 CONFIG=volumes/ops/status/certs
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-S_WRITER_CA=ctxd-high-status-writer-ca
-S_READER_CA=ctxd-high-status-reader-ca
-S_HOST=status.high.ctxd
-A_WRITER_CA=ctxd-high-alerts-writer-ca
-A_HOST=alerts.high.ctxd
+
+
+rm -rf ${CONFIG}
 
 mkdir -p ${CONFIG}/status
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${S_WRITER_CA}/${S_WRITER_CA}.bundle.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${S_READER_CA}/${S_READER_CA}.bundle.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${S_HOST}/${S_HOST}.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${S_HOST}/${S_HOST}.pem \
+cp -f ${OPS_STATUS_WRITER_CA}/${OPS_STATUS_WRITER}.bundle.crt \
+      ${OPS_STATUS_READER_CA}/${OPS_STATUS_READER}.bundle.crt \
+      ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.crt \
+      ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.pem \
       ${CONFIG}/status
 
 mkdir -p ${CONFIG}/alerts
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${A_WRITER_CA}/${A_WRITER_CA}.bundle.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${A_HOST}/${A_HOST}.crt \
-      ${CERTS}/${ROOT_CA}/${INTER_CA}/${A_HOST}/${A_HOST}.pem \
+cp -f ${OPS_ALERTS_WRITER_CA}/${OPS_ALERTS_WRITER}.bundle.crt \
+      ${OPS_INTER_CA}/${OPS_ALERTS_HOST}/${OPS_ALERTS_HOST}.crt \
+      ${OPS_INTER_CA}/${OPS_ALERTS_HOST}/${OPS_ALERTS_HOST}.pem \
       ${CONFIG}/alerts
 
-find ${CONFIG} -type d -exec chmod o+rx {} \;
-find ${CONFIG} -type f -exec chmod o+r {} \;
-
-# #########################
-# 
-# PKI for Ops GitWebHook|
-#
-# #########################
-
-#
-# Allows High Export to read from it and the Console to write to it
-#
-echo "Ops:GitWebHook ..."
-CONFIG=volumes/ops/status/certs
-CERTS=./PKI/high/certs
-ROOT_CA=ctxd-high-root-ca
-INTER_CA=ctxd-high-intermediate-ca
-WRITER_CA=ctxd-high-gitwh-writer-ca
-READER_CA=ctxd-high-gitwh-reader-ca
-HOST=gitwh.high.ctxd
-
-
 mkdir -p ${CONFIG}/gitwh
-cp -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${WRITER_CA}/${WRITER_CA}.bundle.crt \
-   -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${READER_CA}/${READER_CA}.bundle.crt \
-   -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${HOST}/${HOST}.crt \
-   -f ${CERTS}/${ROOT_CA}/${INTER_CA}/${HOST}/${HOST}.pem \
+cp -f ${OPS_GWH_WRITER_CA}/${OPS_GWH_WRITER}.bundle.crt \
+      ${OPS_GWH_READER_CA}/${OPS_GWH_READER}.bundle.crt \
+      ${OPS_INTER_CA}/${OPS_GWH_HOST}/${OPS_GWH_HOST}.crt \
+      ${OPS_INTER_CA}/${OPS_GWH_HOST}/${OPS_GWH_HOST}.pem \
    -f ${CONFIG}/gitwh
+
 find ${CONFIG} -type d -exec chmod o+rx {} \;
 find ${CONFIG} -type f -exec chmod o+r {} \;
 
@@ -208,36 +324,28 @@ echo "Consoles ..."
 #
 
 # Signing PKI
-U_CERTS=./PKI/users/certs
-U_ROOT_CA=ctxd-users-root-ca
-U_ADMINS_CA=ctxd-users-admins-ca
+USERS_CERTS=./PKI/users/certs
+USERS_ROOT_CA=${USERS_CERTS}/ctxd-users-root-ca
+USERS_ADMINS_CA=${USERS_ROOT_CA}/ctxd-users-admins-ca
 
-# Status PKI
-S_CERTS=./PKI/high/certs
-S_ROOT_CA=ctxd-high-root-ca
-S_INTER_CA=ctxd-high-intermediate-ca
-S_READER_CA=ctxd-high-status-reader-ca
-HOST=console.high.ctxd 
-STATUS=status.high.ctxd
+OPS_CERTS=./PKI/ops/certs
+OPS_ROOT_CA=${OPS_CERTS}/root-ca.ops.ctxd
+OPS_INTER_CA=${OPS_ROOT_CA}/intermediate-ca.ops.ctxd
 
-# Alerts PKI
-A_CERTS=./PKI/high/certs
-A_ROOT_CA=ctxd-high-root-ca
-A_INTER_CA=ctxd-high-intermediate-ca
-A_WRITER_CA=ctxd-high-alerts-writer-ca
-HOST=console.high.ctxd 
-ALERTS=alerts.high.ctxd 
+OPS_STATUS_READER_CA=${OPS_INTER_CA}/reader-ca.status.ops.ctxd
+OPS_STATUS_HOST=status.ops.ctxd
 
-# Git Webhook PKI
-G_CERTS=./PKI/high/certs
-G_ROOT_CA=ctxd-high-root-ca
-G_INTER_CA=ctxd-high-intermediate-ca
-G_WRITER_CA=ctxd-high-gitwh-writer-ca
-GWH=gitwh.high.ctxd
+OPS_ALERTS_WRITER_CA=${OPS_INTER_CA}/writer-ca.alerts.ops.ctxd
+OPS_ALERTS_HOST=alerts.ops.ctxd
+
+OPS_GWH_WRITER_CA=${OPS_INTER_CA}/writer-ca.gitwh.ops.ctxd
+OPS_GWH_HOST=gitwh.ops.ctxd
+
+HOST=console.ops.ctxd 
 
 # Get the list of users
 USERS=""
-DIR=${U_CERTS}/${U_ROOT_CA}/${U_ADMINS_CA}
+DIR=${USERS_ADMINS_CA}
 for UserDir in `find $DIR -type d`; do
 
     USER=${UserDir##${DIR}}
@@ -259,6 +367,7 @@ for USER in ${USERS}; do
         mkdir -p ${CONFIG}
     fi
     cp -ru templates/ops/console/* ${CONFIG}
+    sed -i -e "s/<USERNAME>/${USER}/" ${CONFIG}/settings.sfjs
     sed -i -e "s/<USERNAME>/${USER}/" ${CONFIG}/user.sfjs
     
     CONFIG=${CONFIG}/certs
@@ -266,35 +375,35 @@ for USER in ${USERS}; do
         mkdir -p ${CONFIG}
     fi
 
-    # Keys and certs used for Sigining
+    # Keys and certs used for Signing
     CRYPTO=GroupCrypto
     mkdir -p ${CONFIG}/signing
-    cp -f ${U_CERTS}/${U_ROOT_CA}/${U_ADMINS_CA}/${USER}/${USER}.crt \
-          ${U_CERTS}/${U_ROOT_CA}/${U_ADMINS_CA}/${USER}/${USER}.pem \
-          ${U_CERTS}/${U_ROOT_CA}/${U_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pem \
-          ${U_CERTS}/${U_ROOT_CA}/${U_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pub.pem \
+    cp -f ${USERS_ADMINS_CA}/${USER}/${USER}.crt \
+          ${USERS_ADMINS_CA}/${USER}/${USER}.pem \
+          ${USERS_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pem \
+          ${USERS_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pub.pem \
           ${CONFIG}/signing
 
     # Keys and certs used to access the local git webhook server
     mkdir -p ${CONFIG}/gitWebHook
-    cp -f ${G_CERTS}/${G_ROOT_CA}/${G_INTER_CA}/${G_WRITER_CA}/${HOST}/${HOST}.crt \
-          ${G_CERTS}/${G_ROOT_CA}/${G_INTER_CA}/${G_WRITER_CA}/${HOST}/${HOST}.pem \
-          ${G_CERTS}/${G_ROOT_CA}/${G_INTER_CA}/${GWH}/${GWH}.bundle.crt \
+    cp -f ${OPS_GWH_WRITER_CA}/${HOST}/${HOST}.crt \
+          ${OPS_GWH_WRITER_CA}/${HOST}/${HOST}.pem \
+          ${OPS_INTER_CA}/${OPS_GWH_HOST}/${OPS_GWH_HOST}.bundle.crt \
           ${CONFIG}/gitWebHook
     
 
     # Keys and certs used to access the Status MM
     mkdir -p ${CONFIG}/status
-    cp -f ${S_CERTS}/${S_ROOT_CA}/${S_INTER_CA}/${S_READER_CA}/${HOST}/${HOST}.crt \
-          ${S_CERTS}/${S_ROOT_CA}/${S_INTER_CA}/${S_READER_CA}/${HOST}/${HOST}.pem \
-          ${S_CERTS}/${S_ROOT_CA}/${S_INTER_CA}/${STATUS}/${STATUS}.bundle.crt \
+    cp -f ${OPS_STATUS_READER_CA}/${HOST}/${HOST}.crt \
+          ${OPS_STATUS_READER_CA}/${HOST}/${HOST}.pem \
+          ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.bundle.crt \
           ${CONFIG}/status
     
     # Keys and certs used to access the Alerts MM
     mkdir -p ${CONFIG}/alerts
-    cp -f ${A_CERTS}/${A_ROOT_CA}/${A_INTER_CA}/${A_WRITER_CA}/${HOST}/${HOST}.crt \
-          ${A_CERTS}/${A_ROOT_CA}/${A_INTER_CA}/${A_WRITER_CA}/${HOST}/${HOST}.pem \
-          ${A_CERTS}/${A_ROOT_CA}/${A_INTER_CA}/${ALERTS}/${ALERTS}.bundle.crt \
+    cp -f ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.crt \
+          ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.pem \
+          ${OPS_INTER_CA}/${OPS_ALERTS_HOST}/${OPS_ALERTS_HOST}.bundle.crt \
           ${CONFIG}/alerts
     
     find ${CONFIG} -type d -exec chmod o+rx {} \;
@@ -309,7 +418,9 @@ echo
 echo "Config Generated"
 echo
 echo "Remember to update the Git configuration in:"
-echo "  volumes/high/export/git.sfjs"
+for ZONE in $ZONE_VOLS; do
+    echo "  ${ZONE}/git.sfjs"
+done
 for USER in $USERS; do
     echo "  volumes/ops/console/${USER}/git.sfjs"
 done

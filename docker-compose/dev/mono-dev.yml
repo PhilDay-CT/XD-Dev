@@ -40,12 +40,24 @@ configs:
         protocol: http,
       }
     
-  # High Side Import Status Server
-  status_high:
+  # High Side Ops Status Server
+  status_ops:
     content: |
       {
         remote: {
-          host: "import.high.ctxd", 
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
+        }
+      }
+
+  # High Side Import Status Server (used by Gateway)
+  status_high:
+    content: |
+      {
+        status: {
+          host: "status.high.ctxd", 
           port: 7776, 
           channel: "ct-status"
         }
@@ -80,7 +92,13 @@ configs:
   stats_high:
     content: |
       {
-        thingsboard: {enabled: false}
+        thingsboard: {
+          enabled: true, 
+          host: "thingsboard.cloud", 
+          protocol: https, 
+          port: 443, 
+          token: readstring('/run/secrets/thingsboard')
+        }
       }    
 
   # Low side of the Gateway (i.e. to High domain)
@@ -111,6 +129,27 @@ configs:
         host: "export.low.ctxd",
         port: 80,
         protocol: http,
+      }
+
+  # Low domain config source
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
+
+  # Low Domain Status Server
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
       }
 
   # Import Diode Config
@@ -208,7 +247,7 @@ services:
       - ${XD_DEV?}/images/low/low_export/sfjs/Config.sfjx:/opt/ct/init/Config.sfjx
       - ${XD_DEV?}/images/low/low_export/sfjs/ExportPipelines.sfjx:/opt/ct/init/ExportPipelines.sfjx
       - ${XD_DEV?}/images/low/low_export/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
-      - ${XD_DEV?}/images/low/low_export/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
+      - ${XD_DEV?}/images/low/low_export/sfjs/HttpServer.sfjx:/opt/ct/init/HttpServer.sfjx
       - ${XD_DEV?}/images/low/low_export/sfjs/Low_Export.sfjs:/opt/ct/init/Low_Export.sfjs
 
   low_emulators:
@@ -218,11 +257,6 @@ services:
     volumes:
       - ${XD_DEV?}/src:/opt/ct/src
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config.sfjs:/opt/ct/init-config/low-config.sfjs
-      - ${XD_DEV?}/images/low/low_base/config/init-config/low-config-local.sfjs:/opt/ct/init-config/low-config-local.sfjs
-      - ${XD_DEV?}/images/low/low_base/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
-      - ${XD_DEV?}/images/low/low_base/sfjs/Alerts.sfjx:/opt/ct/init/Alerts.sfjx
-      - ${XD_DEV?}/images/low/low_base/sfjs/PipelineStatus.sfjx:/opt/ct/init/PipelineStatus.sfjx
       - ${XD_DEV?}/images/low/low_emulators/sfjs/Local.sfjx:/opt/ct/init/Local.sfjx
       - ${XD_DEV?}/images/low/low_emulators/sfjs/Low_Emulators.sfjs:/opt/ct/init/Low_Emulators.sfjs
 
@@ -240,7 +274,6 @@ services:
       service: high_import
     volumes:
       - ${XD_DEV?}/node_modules:/opt/ct/node_modules
-      - ${XD_DEV?}/images/high/high_import/statusSender.sfjs:/opt/ct/system/init/statusSender.sfjs
       - ${XD_DEV?}/images/high/high_base/config/init-config/high-config.sfjs:/opt/ct/init-config/high-config.sfjs
       - ${XD_DEV?}/images/high/high_base/config/init-config/high-config-local.sfjs:/opt/ct/init-config/high-config-local.sfjs
       - ${XD_DEV?}/images/high/high_base/templates:/opt/ct/templates
@@ -252,7 +285,7 @@ services:
       - ${XD_DEV?}/images/high/high_import/sfjs/SfjsAck.sfjx:/opt/ct/init/SfjsAck.sfjx
       - ${XD_DEV?}/images/high/high_import/sfjs/Stats.sfjx:/opt/ct/init/Stats.sfjx
       - ${XD_DEV?}/images/high/high_import/sfjs/Status.sfjx:/opt/ct/init/Status.sfjx
-      - ${XD_DEV?}/images/high/high_import/sfjs/WebServer.sfjx:/opt/ct/init/WebServer.sfjx
+      - ${XD_DEV?}/images/high/high_import/sfjs/HttpServer.sfjx:/opt/ct/init/HttpServer.sfjx
       - ${XD_DEV?}/images/high/high_import/sfjs/High_Import.sfjs:/opt/ct/init/High_Import.sfjs
   
   high_export:

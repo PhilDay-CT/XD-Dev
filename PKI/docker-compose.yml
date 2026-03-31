@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   ct-pki:
     image: ghcr.io/configuredthings/ct-pki:1.0.0

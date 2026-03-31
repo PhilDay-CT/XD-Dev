@@ -55,13 +55,13 @@ let
 
     SERVER: $TYPE << {
         type: SERVER,
-        keys: $KEYS << {ECDHKeyPair: true},
+        keys: $KEYS,
         passphrase: ""  
     },
 
     CLIENT: $TYPE << {
         type: CLIENT,
-        keys: $KEYS << {ECDHKeyPair: true},
+        keys: $KEYS,
         passphrase: ""
     },
 in
@@ -69,10 +69,10 @@ in
         signing: [
             $ROOT << {
                 organisationalUnits: [],
-                name: "ctxd-ops-root-ca",
+                name: "root-ca.ops.ctxd",
                 signing: [
                     $CA << {
-                        name: "ctxd-ops-intermediate-ca",
+                        name: "intermediate-ca.ops.ctxd",
                         organisationalUnits: [ctxd, Ops],
                         signing: [
  
@@ -84,25 +84,52 @@ in
                             },
                                     
                             //
-                            // Status Writers
+                            // Status Writers  - need to sign a cert for
+                            // each high side docker that will send status
                             //
                             $CA << {
-                                name: "ctxd-ops-status-writer-ca",
+                                name: "writer-ca.status.ops.ctxd",
                                 organisationalUnits: [ctxd, Ops, Status, Writer],
                                 signing: [
                                     $SERVER << {
                                         name: "import.high.ctxd",
                                     },
+                                    $SERVER << {
+                                        name: "export.high.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "mqtt.high.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "import.high.zone1.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "export.high.zone1.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "mqtt.high.zone1.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "import.high.zone2.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "export.high.zone2.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "mqtt.high.zone2.ctxd",
+                                    },
                                 ]
                             },
                             
                             //
-                            // Status Readers
+                            // Status Readers - need to sign a cert for each
+                            // user's console
                             //
                             $CA << {
-                                name: "ctxd-ops-status-reader-ca",
+                                name: "reader-ca.status.ops.ctxd",
                                 organisationalUnits: [ctxd, Ops, Status, Reader],
                                 signing: [
+
                                     $SERVER << {
                                         name: "console.ops.ctxd",
                                     },
@@ -117,14 +144,21 @@ in
                             },
                                     
                             //
-                            // Alert Writers
+                            // Alert Writers - need to sign a cert each high side
+                            // import docker, and for each user's console 
                             //
                             $CA << {
-                                name: "ctxd-ops-alerts-writer-ca",
+                                name: "writer-ca.alerts.ops.ctxd",
                                 organisationalUnits: [ctxd, Ops, Alerts, Writer],
                                 signing: [
                                     $SERVER << {
                                         name: "import.high.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "import.high.zone1.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "import.high.zone2.ctxd",
                                     },
                                     $SERVER << {
                                         name: "console.ops.ctxd",
@@ -140,10 +174,11 @@ in
                             },
                                     
                             //
-                            // Git WebHook  Writers
+                            // Git WebHook Writers - need to sign a cert
+                            // for each user's console 
                             //
                             $CA << {
-                                name: "ctxd-ops-gitwh-writer-ca",
+                                name: "writer-ca.gitwh.ops.ctxd",
                                 organisationalUnits: [ctxd, Ops, Gitwh, Writer],
                                 signing: [
                                     $SERVER << {
@@ -153,14 +188,21 @@ in
                             },
                             
                             //
-                            // Status Readers
+                            // Git WebHook Readers - need sign a cert for
+                            // each high side export docker
                             //
                             $CA << {
-                                name: "ctxd-ops-gitwh-reader-ca",
+                                name: "reader-ca.gitwh.ops.ctxd",
                                 organisationalUnits: [ctxd, Ops, Gitwh, Reader],
                                 signing: [
                                     $SERVER << {
                                         name: "export.high.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "export.high.zone1.ctxd",
+                                    },
+                                    $SERVER << {
+                                        name: "export.high.zone2.ctxd",
                                     },
                                 ]
                             },

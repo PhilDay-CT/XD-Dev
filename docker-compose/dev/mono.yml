@@ -40,12 +40,24 @@ configs:
         protocol: http,
       }
     
-  # High Side Import Status Server
-  status_high:
+  # High Side Ops Status Server
+  status_ops:
     content: |
       {
         remote: {
-          host: "import.high.ctxd", 
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
+        }
+      }
+
+  # High Side Import Status Server (used by Gateway)
+  status_high:
+    content: |
+      {
+        status: {
+          host: "status.high.ctxd", 
           port: 7776, 
           channel: "ct-status"
         }
@@ -113,6 +125,27 @@ configs:
         protocol: http,
       }
 
+  # Low domain config source
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
+
+  # Low Domain Status Server
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+    
   # Import Diode Config
   import_diode:
     content: |
@@ -133,6 +166,7 @@ configs:
         }
       }
 
+   
 #
 # Secrets
 #
@@ -199,7 +233,7 @@ services:
         
   low_emulators:
     extends: 
-      file: ../low/ctxd.yml
+      file: ../low/emulators.yml
       service: low_emulators
   
 networks:

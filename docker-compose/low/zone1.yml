@@ -42,39 +42,62 @@ configs:
           format:   json
       }
 
+  # MM to connect to for configuration
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
+
+  # MM to send status to
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+    
+  
 services:
 
   low_import:
     extends:
       file: ./ctxd.yml
       service: low_import
+    hostname: import.low.zone1.ctxd  
     configs:
       - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+        target: /opt/ct/config/zone.sfjs  
 
   low_export:
     extends:
       file: ./ctxd.yml
       service: low_export
+    hostname: export.low.zone1.ctxd  
     configs:
       - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+        target: /opt/ct/config/zone.sfjs  
 
   low_mqtt:
     extends: 
       file: ./ctxd.yml
       service: low_mqtt
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    hostname: mqtt.low.zone1.ctxd  
       
   low_emulators:
     extends:
-      file: ./ctxd.yml
+      file: ./emulators.yml
       service: low_emulators
+    hostname: emulators.low.zone1.ctxd  
     configs:
       - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+        target: /opt/ct/config/zone.sfjs  
 
 networks:
   ctxd_low:

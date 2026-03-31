@@ -15,8 +15,8 @@ configs:
 services:
 
   status:
-    image: ghcr.io/configuredthings/ctxd_ops_status:2.13.1
-    hostname: ops-status
+    image: ghcr.io/configuredthings/ctxd_ops_status:2.13.4
+    hostname: status.ops.ctxd
     ports:
       - 32001:32001
       - 32002:32002
@@ -32,9 +32,9 @@ services:
     networks:
       ctxd_ops:
         aliases:
-          - status.high.ctxd
-          - alerts.high.ctxd
-          - gitwh.high.ctxd
+          - status.ops.ctxd
+          - alerts.ops.ctxd
+          - gitwh.ops.ctxd
     
 networks:
   ctxd_ops:

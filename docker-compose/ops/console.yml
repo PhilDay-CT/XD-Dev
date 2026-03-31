@@ -13,7 +13,7 @@ services:
 
   console:
     image: ghcr.io/configuredthings/sfjs-console:2.34.0
-    hostname: ops-console
+    hostname: console.ops.ctxd
     environment:
       - SFJS_CONSOLE_PORT=33080
     ports:

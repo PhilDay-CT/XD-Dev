@@ -41,10 +41,12 @@ services:
   # Low Domain Import Service
   #    
   low_import:
-    image: ghcr.io/configuredthings/ctxd_low_import:2.13.1
-    hostname: low_import
+    image: ghcr.io/configuredthings/ctxd_low_import:2.13.4
+    hostname: import.low.ctxd
     networks:
-      - ctxd_low
+      ctxd_low:
+        aliases:
+          - status.low.ctxd     
     configs:
       - source: gateway_low
         target: /opt/ct/config/gateway.sfjs
@@ -55,8 +57,8 @@ services:
   # Low Domain Export Service
   #  
   low_export:
-    image:  ghcr.io/configuredthings/ctxd_low_export:2.13.1
-    hostname: low_export
+    image:  ghcr.io/configuredthings/ctxd_low_export:2.13.4
+    hostname: export.low.ctxd
     networks:
       ctxd_low:
         aliases:
@@ -74,8 +76,8 @@ services:
   # Low Domain MQTT Service
   #
   low_mqtt:
-    image: ghcr.io/configuredthings/ctxd_low_mqtt:2.13.1
-    hostname: low_mqtt
+    image: ghcr.io/configuredthings/ctxd_low_mqtt:2.13.4
+    hostname: mqtt.low.ctxd
     ports:
       - 21883:1883
     networks:
@@ -85,20 +87,6 @@ services:
     configs:
       - source: gateway_low
         target: /opt/ct/config/gateway.sfjs
-    
-  #
-  # Low Domain Device Emulator Service
-  #
-  low_emulators:
-    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.13.1
-    hostname: low_emulators
-    networks:
-      - ctxd_low
-    configs:
-      - source: gateway_low
-        target: /opt/ct/config/gateway.sfjs
-      - source: mqtt_low
-        target: /opt/ct/integrations/mqtt.sfjs
     
 networks:
   ctxd_low:

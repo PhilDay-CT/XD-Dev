@@ -1,0 +1,63 @@
+#
+# Docker Compose file for the Low Domain Emulators Example
+#
+
+name: "ctxd-app"
+
+configs:
+
+  # MM to connect to for configuration
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
+
+  # MM to send status to
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+    
+  # External MQTT server
+  mqtt_low:
+    content: |
+      {
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+services:
+
+  #
+  # Low Domain Device Emulator Service
+  #
+  low_emulators:
+    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.13.4
+    hostname: emulators.low.ctxd
+    networks:
+      - ctxd_low
+    configs:
+      - source: config_low
+        target: /opt/ct/config/config.sfjs
+      - source: status_low
+        target: /opt/ct/system/config/status.sfjs  
+      - source: mqtt_low
+        target: /opt/ct/config/mqtt.sfjs
+    
+networks:
+  ctxd_low:
+    name: ctxd_low
+
+
+

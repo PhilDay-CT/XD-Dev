@@ -7,7 +7,7 @@
 //
 {
     certfiles: {
-        Admins:  $CONFIG_DIR + 'certs/users/ctxd-users-admins-ca.crt',
+        Admins:  $CERT_DIR + 'users/ctxd-users-admins-ca.crt',
     },
     logic:       'Admins',
     description: "Admin policy"

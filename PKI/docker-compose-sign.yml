@@ -3,7 +3,6 @@
 # for all the files in configurtaion repository
 #
 #
-version: "3"
 name: ct-base
 
 services:

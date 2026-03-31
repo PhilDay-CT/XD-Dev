@@ -40,12 +40,24 @@ configs:
         protocol: http,
       }
     
+  # High Side Ops Status Server
+  status_ops:
+    content: |
+      {
+        remote: {
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
+        }
+      }
+
   # High Side Import Status Server
   status_high:
     content: |
       {
         remote: {
-          host: "import.high.ctxd", 
+          host: "status.high.ctxd", 
           port: 7776, 
           channel: "ct-status"
         }
@@ -114,6 +126,27 @@ configs:
         protocol: http,
       }
 
+  # MM to connect to for configuration
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
+
+  # MM to send status to
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+    
   # Import Diode Config
   import_diode:
     content: |
@@ -150,90 +183,61 @@ services:
 
   high_mqtt:
     extends: 
-      file: ../dev/mono.yml
+      file: ../high/zone2.yml
       service: high_mqtt
-    image: ctxd_high_mqtt:2.13.1
+    image: ctxd_high_mqtt:2.13.4
     ports: !override
       - 32883:1883
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
       
   high_import:
     extends:
-      file: ../dev/mono.yml
+      file: ../high/zone2.yml
       service: high_import
-    image: ctxd_high_import:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_high_import:2.13.4
       
   high_export:
     extends:
-      file: ../dev/mono.yml
+      file: ../high/zone2.yml
       service: high_export
-    image: ctxd_high_export:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs
-    volumes:    
-      - ../../volumes/high/export/git-zones.sfjs:/opt/ct/config/git.sfjs
+    image: ctxd_high_export:2.13.4
   
   import_diode:
     extends: 
-      file: ../dev/mono.yml
+      file: ../gateway/zone2.yml
       service: import_diode
-    image: ctxd_diode:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_diode:2.13.4
           
   export_diode:
     extends: 
-      file: ../dev/mono.yml
+      file: ../gateway/zone2.yml
       service: export_diode
-    image: ctxd_diode:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_diode:2.13.4
 
   low_mqtt:
     extends: 
-      file: ../dev/mono.yml
+      file: ../low/zone2.yml
       service: low_mqtt
-    image: ctxd_low_mqtt:2.13.1
+    image: ctxd_low_mqtt:2.13.4
     ports: !override
       - 22883:1883
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
       
   low_import:
     extends:
-      file: ../dev/mono.yml
+      file: ../low/zone2.yml
       service: low_import
-    image: ctxd_low_import:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_low_import:2.13.4
 
   low_export:
     extends:
-      file: ../dev/mono.yml
+      file: ../low/zone2.yml
       service: low_export
-    image: ctxd_low_export:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_low_export:2.13.4
 
   low_emulators:
     extends:
-      file: ../dev/mono.yml
+      file: ../low/zone2.yml
       service: low_emulators
-    image: ctxd_low_emulators:2.13.1
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
+    image: ctxd_low_emulators:2.13.4
 
 networks:
   ctxd_low:

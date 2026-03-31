@@ -31,14 +31,15 @@ configs:
         protocol: http,
       }
     
-  # High Side Import Status Server
-  status_high:
+  # High Side Ops Status Server
+  status_ops:
     content: |
       {
         remote: {
-          host: "import.high.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
         }
       }
 
@@ -118,27 +119,35 @@ services:
     extends:
       file: ./ctxd.yml
       service: high_import
+    hostname: import.high.zone1.ctxd  
     configs:
       - source: zone
-        target: /opt/ct/system/config/zone.sfjs  
-      
+        target: /opt/ct/config/zone.sfjs
+    volumes:
+      - ../../volumes/zone1/high/import/certs:/opt/ct/certs
+          
   high_export:
     extends:
       file: ./ctxd.yml
       service: high_export
+    hostname: export.high.zone1.ctxd  
     configs:
       - source: zone
-        target: /opt/ct/system/config/zone.sfjs
+        target: /opt/ct/config/zone.sfjs
+    volumes:
+      - ../../volumes/zone1/high/export/certs:/opt/ct/certs
+      - ../../volumes/zone1/high/export/keys:/opt/ct/keys
+      - ../../volumes/zone1/high/export/git.sfjs:/opt/ct/config/git.sfjs
+      - ../../volumes/zone1/high/export/policy.sfjs:/opt/ct/config/policy.sfjs
+    
   
   high_mqtt:
     extends: 
       file: ./ctxd.yml
       service: high_mqtt
-    configs:
-      - source: zone
-        target: /opt/ct/system/config/zone.sfjs
-    ports:
-            
+    hostname: mqtt.high.zone1.ctxd
+    volumes:
+      - ../../volumes/zone1/high/mqtt/certs:/opt/ct/certs
 
 networks:
   ctxd_high:
