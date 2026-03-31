@@ -1,5 +1,4 @@
 secrets
-PKI/opt/certs
-PKI/users/certs
+PKI/**/certs
 volumes/**/certs
 volumes/**/keys
