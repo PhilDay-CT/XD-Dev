@@ -12,7 +12,7 @@ secrets:
 services:
 
   console:
-    image: ghcr.io/configuredthings/sfjs-console:2.34.0
+    image: ghcr.io/configuredthings/sfjs-console:3.2.0
     hostname: console.ops.ctxd
     environment:
       - SFJS_CONSOLE_PORT=33080

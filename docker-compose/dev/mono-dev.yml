@@ -31,15 +31,6 @@ configs:
         protocol: http,
       }
 
-  # Low Side Export Web Server
-  export_high:
-    content: |
-      {
-        host: "export.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
   # High Side Ops Status Server
   status_ops:
     content: |
@@ -93,7 +84,7 @@ configs:
     content: |
       {
         thingsboard: {
-          enabled: true, 
+          enabled: false, 
           host: "thingsboard.cloud", 
           protocol: https, 
           port: 443, 

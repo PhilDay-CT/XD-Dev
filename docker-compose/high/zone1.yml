@@ -137,10 +137,9 @@ services:
     volumes:
       - ../../volumes/zone1/high/export/certs:/opt/ct/certs
       - ../../volumes/zone1/high/export/keys:/opt/ct/keys
-      - ../../volumes/zone1/high/export/git.sfjs:/opt/ct/config/git.sfjs
-      - ../../volumes/zone1/high/export/policy.sfjs:/opt/ct/config/policy.sfjs
-    
-  
+      - ../../volumes/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
+      - ../../volumes/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
+     
   high_mqtt:
     extends: 
       file: ./ctxd.yml

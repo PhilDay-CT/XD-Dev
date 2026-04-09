@@ -43,7 +43,7 @@ services:
   # Low Domain Device Emulator Service
   #
   low_emulators:
-    image:  ghcr.io/configuredthings/ctxd_low_emulators:2.13.4
+    image:  ghcr.io/configuredthings/ctxd_low_emulators:3.3.0
     hostname: emulators.low.ctxd
     networks:
       - ctxd_low

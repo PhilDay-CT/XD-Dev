@@ -37,15 +37,6 @@ configs:
         protocol: http,
       }
 
-  # Low Side Export Web Server
-  export_high:
-    content: |
-      {
-        host: "export.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
   # High Side Ops Status Server
   status_ops:
     content: |

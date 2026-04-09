@@ -15,7 +15,7 @@ configs:
 services:
 
   status:
-    image: ghcr.io/configuredthings/ctxd_ops_status:2.13.4
+    image: ghcr.io/configuredthings/ctxd_ops_status:3.3.0
     hostname: status.ops.ctxd
     ports:
       - 32001:32001
