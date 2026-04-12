@@ -23,24 +23,25 @@ in
     //
     git: {
         provider: $GIT.provider,
+        protocol: $GIT.protocol,
         user:     $GIT.user,
-        config:   $GIT.repo,
-        config_token: readstring('/run/secrets/git'),
+        config:   $GIT.origin,
+        config_token: $GIT.token,
         config_branch: $GIT.branch,
         webHook: {
             enabled:  true,
             host:     "gitwh.ops.ctxd",
             port:     32004,
             protocol: https,
-            hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/console.ops.ctxd.pem",
-            hostCert: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/console.ops.ctxd.crt",
-            acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/gitwh.ops.ctxd.bundle.crt",
+            hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/" + os_hostname() + ".pem",
+            hostCert: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/" + os_hostname() + ".crt",
+            acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/gitWebHook/" + @host + ".bundle.crt",
             channel:  gitWebHook,
         }
     },
 
     //
-    // Status MM
+    // SFJS MM (status)
     //
     statusDebounce: 10,
 
@@ -50,24 +51,21 @@ in
         port: 32002,
         protocol: https,
         channel:  ctxdStatus,
-        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/status/console.ops.ctxd.pem",
-        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/status/console.ops.ctxd.crt",
-        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/status/status.ops.ctxd.bundle.crt",
+        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/status/" + os_hostname() + ".pem",
+        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/status/" + os_hostname() + ".crt",
+        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/status/" + @host + ".bundle.crt",
         //debounce: 0,
     },
 
-    //
-    // Alerts
-    //
     alerts: {
         enabled: true,
         host: "alerts.ops.ctxd",
         port: 32003,
         protocol: https,
         channel:  ctxdAlerts,
-        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/alerts/console.ops.ctxd.pem",
-        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/alerts/console.ops.ctxd.crt",
-        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/alerts/alerts.ops.ctxd.bundle.crt",
+        hostKey:  env("SFJS_CONSOLE_ENV") + "/certs/alerts/" + os_hostname() + ".pem",
+        hostCert: env("SFJS_CONSOLE_ENV") + "/certs/alerts/" + os_hostname() + ".crt",
+        acceptCA: env("SFJS_CONSOLE_ENV") + "/certs/alerts/"+ @host + ".bundle.crt",
     },
 
     user: {

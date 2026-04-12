@@ -10,15 +10,18 @@
 // For example:
 // {
 //    provider: "github",
+//    origin: "github.com/MyOrg/MyConfigRepo.git",
 //    user: "CT-Admin",
-//    repo: "github.com/MyOrg/MyConfigRepo.git",
+//    token: readstring('/run/secrets/git'),
 //    branch: 'main',
 // }        
 //
 //
 {
     provider: github,
+    protocol: https,
+    origin: 'github.com/PhilDay-CT/XD-Dev-config.git',
     user: 'PhilDay-CT',
-    repo: 'github.com/PhilDay-CT/XD-Dev-config.git',
-    branch: 'zones',
+    token: readstring('/run/secrets/git'),
+    branch: 'main',
 }

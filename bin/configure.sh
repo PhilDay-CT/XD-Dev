@@ -15,17 +15,17 @@ export GID=$(id -g);
 
     echo
     echo "+---------------------+"
-    echo "| Generating high PKI |"
+    echo "| Generating ops PKI |"
     echo "+---------------------+"
     mkdir -p ops/certs
-    export PKI_ENV=ops; docker-compose up
+    export PKI_ENV=ops; docker-compose up --menu=false
 
     echo
     echo "+---------------------+"
     echo "| Generating User PKI |"
     echo "+---------------------+"
     mkdir -p users/certs
-    export PKI_ENV=users; docker-compose up 
+    export PKI_ENV=users; docker-compose up --menu=false
 )
 
 #
@@ -361,8 +361,9 @@ done
 for USER in ${USERS}; do
     echo "   ${USER}..."
 
-    CONFIG=volumes/ops/console/${USER}
+    USER_DIR=volumes/ops/console/${USER}
     
+    CONFIG=${USER_DIR}/config
     if [[ ! -d ${CONFIG} ]]; then
         mkdir -p ${CONFIG}
     fi
@@ -370,44 +371,47 @@ for USER in ${USERS}; do
     sed -i -e "s/<USERNAME>/${USER}/" ${CONFIG}/settings.sfjs
     sed -i -e "s/<USERNAME>/${USER}/" ${CONFIG}/user.sfjs
     
-    CONFIG=${CONFIG}/certs
-    if [[ ! -d $CONFIG ]]; then
-        mkdir -p ${CONFIG}
+    find ${CONFIG} -type d -exec chmod o+rx {} \;
+    find ${CONFIG} -type f -exec chmod o+r {} \;
+
+    CERTS=${USER_DIR}/certs
+    if [[ ! -d $CERTS ]]; then
+        mkdir -p ${CERTS}
     fi
 
     # Keys and certs used for Signing
     CRYPTO=GroupCrypto
-    mkdir -p ${CONFIG}/signing
+    mkdir -p ${CERTS}/signing
     cp -f ${USERS_ADMINS_CA}/${USER}/${USER}.crt \
           ${USERS_ADMINS_CA}/${USER}/${USER}.pem \
           ${USERS_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pem \
           ${USERS_ADMINS_CA}/${CRYPTO}/${CRYPTO}.ecdh.pub.pem \
-          ${CONFIG}/signing
+          ${CERTS}/signing
 
     # Keys and certs used to access the local git webhook server
-    mkdir -p ${CONFIG}/gitWebHook
+    mkdir -p ${CERTS}/gitWebHook
     cp -f ${OPS_GWH_WRITER_CA}/${HOST}/${HOST}.crt \
           ${OPS_GWH_WRITER_CA}/${HOST}/${HOST}.pem \
           ${OPS_INTER_CA}/${OPS_GWH_HOST}/${OPS_GWH_HOST}.bundle.crt \
-          ${CONFIG}/gitWebHook
+          ${CERTS}/gitWebHook
     
 
     # Keys and certs used to access the Status MM
-    mkdir -p ${CONFIG}/status
+    mkdir -p ${CERTS}/status
     cp -f ${OPS_STATUS_READER_CA}/${HOST}/${HOST}.crt \
           ${OPS_STATUS_READER_CA}/${HOST}/${HOST}.pem \
           ${OPS_INTER_CA}/${OPS_STATUS_HOST}/${OPS_STATUS_HOST}.bundle.crt \
-          ${CONFIG}/status
+          ${CERTS}/status
     
     # Keys and certs used to access the Alerts MM
-    mkdir -p ${CONFIG}/alerts
+    mkdir -p ${CERTS}/alerts
     cp -f ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.crt \
           ${OPS_ALERTS_WRITER_CA}/${HOST}/${HOST}.pem \
           ${OPS_INTER_CA}/${OPS_ALERTS_HOST}/${OPS_ALERTS_HOST}.bundle.crt \
-          ${CONFIG}/alerts
+          ${CERTS}/alerts
     
-    find ${CONFIG} -type d -exec chmod o+rx {} \;
-    find ${CONFIG} -type f -exec chmod o+r {} \;
+    find ${CERTS} -type d -exec chmod o+rx {} \;
+    find ${CERTS} -type f -exec chmod o+r {} \;
 
 done
 
@@ -422,7 +426,7 @@ for ZONE in $ZONE_VOLS; do
     echo "  ${ZONE}/git.sfjs"
 done
 for USER in $USERS; do
-    echo "  volumes/ops/console/${USER}/git.sfjs"
+    echo "  volumes/ops/console/${USER}/config/git.sfjs"
 done
 
 echo
@@ -430,8 +434,8 @@ echo "Remember to create the following files."
 echo "  secrets/high/git"
 echo "  secrets/high/slack (optional)"
 for USER in $USERS; do
-    echo "  secrets/ops/console/${USER}/password"
-    echo "  secrets/ops/console/${USER}/git"
+    echo "  secrets/ops/console/${USER}/config/password"
+    echo "  secrets/ops/console/${USER}/config/git"
 done
 
 

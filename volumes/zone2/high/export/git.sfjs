@@ -11,14 +11,14 @@
 // {
 //    provider: "github",
 //    user: "CT-Admin",
-//    repo: "github.com/MyOrg/MyConfigRepo.git",
+//    origin: "github.com/MyOrg/MyConfigRepo.git",
 //    branch: 'main',
 // }        
 //
 //
 {
-    provider: github,
-    user: "PhilDay-CT",
-    repo: "github.com/PhilDay-CT/XD-Dev-config",
-    branch: 'zones',
+    provider: << github | bitbucket >>,
+    user: << git username >>,
+    origin: << git repo: e.g. "bitbucket.org/my_org/config.git" >>,
+    branch: 'main',
 }

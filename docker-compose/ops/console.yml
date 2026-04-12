@@ -12,17 +12,17 @@ secrets:
 services:
 
   console:
-    image: ghcr.io/configuredthings/sfjs-console:3.2.0
+    image: ghcr.io/configuredthings/sfjs-console:${console_version}
     hostname: console.ops.ctxd
     environment:
-      - SFJS_CONSOLE_PORT=33080
+      - SFJS_CONSOLE_PORT=${console_port}
     ports:
-      - 33080:80
+      - ${console_port}:80
     volumes:
-      - ../../volumes/ops/console/ct-admin/settings.sfjs:/opt/ct/gui/settings.sfjs
-      - ../../volumes/ops/console/ct-admin/git.sfjs:/opt/ct/gui/git.sfjs
-      - ../../volumes/ops/console/ct-admin/user.sfjs:/opt/ct/gui/user.sfjs
       - ../../volumes/ops/console/ct-admin/certs:/opt/ct/gui/certs
+      - ../../volumes/ops/console/ct-admin/config/settings.sfjs:/opt/ct/gui/settings.sfjs
+      - ../../volumes/ops/console/ct-admin/config/git.sfjs:/opt/ct/gui/git.sfjs
+      - ../../volumes/ops/console/ct-admin/config/user.sfjs:/opt/ct/gui/user.sfjs
     secrets:
       - git
       - user

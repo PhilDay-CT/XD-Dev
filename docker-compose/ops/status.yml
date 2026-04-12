@@ -15,7 +15,7 @@ configs:
 services:
 
   status:
-    image: ghcr.io/configuredthings/ctxd_ops_status:3.3.0
+    image: ghcr.io/configuredthings/ctxd_ops_status:${ctxd_version}
     hostname: status.ops.ctxd
     ports:
       - 32001:32001
@@ -27,8 +27,8 @@ services:
     #  - source: ext_webhook
     #    target: /opt/ct/config/ext_webhook.sfjs
     volumes:
-      - ../../volumes/ops/status/certs:/opt/ct/config/certs
-      - ../../volumes/ops/status/ext_certs:/opt/ct/config/ext_certs
+      - ../../volumes/ops/status/certs:/opt/ct/certs
+    #  - ../../volumes/ops/status/ext_certs:/opt/ct/ext_certs
     networks:
       ctxd_ops:
         aliases:

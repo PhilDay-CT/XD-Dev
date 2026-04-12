@@ -16,13 +16,13 @@ services:
     extends: 
       file: ../ops/ops.yml
       service: status
-    image: ctxd_ops_status:3.3.0
+    image: ctxd_ops_status:${ctxd_version}
 
   console:
     extends: 
       file: ../ops/ops.yml
       service: console
-    image: sfjs-console:3.1.0
+    image: sfjs-console:${console_version}
   
 networks:
   ctxd_ops:

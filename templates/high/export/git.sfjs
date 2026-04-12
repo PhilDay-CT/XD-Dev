@@ -11,7 +11,7 @@
 // {
 //    provider: "github",
 //    user: "CT-Admin",
-//    repo: "github.com/MyOrg/MyConfigRepo.git",
+//    origin: "github.com/MyOrg/MyConfigRepo.git",
 //    branch: 'main',
 // }        
 //
@@ -19,6 +19,6 @@
 {
     provider: << github | bitbucket >>,
     user: << git username >>,
-    repo: << git repo: e.g. "bitbucket.org/my_org/config.git" >>,
+    origin: << git repo: e.g. "bitbucket.org/my_org/config.git" >>,
     branch: 'main',
 }
