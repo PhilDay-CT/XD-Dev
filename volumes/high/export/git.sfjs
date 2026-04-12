@@ -17,8 +17,9 @@
 //
 //
 {
-    provider: << github | bitbucket >>,
-    user: << git username >>,
-    origin: << git repo: e.g. "bitbucket.org/my_org/config.git" >>,
-    branch: 'main',
+    provider: github,
+    user: "PhilDay-CT",
+    repo: "github.com/PhilDay-CT/XD-Dev-config",
+    origin: "github.com/PhilDay-CT/XD-Dev-config",
+    branch: 'main'
 }
