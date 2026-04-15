@@ -5,110 +5,15 @@ name: "ctxd-1"
 # the Cross Domain services in "Mono" mode using
 # local images
 #
-configs:
-
-  zone:
-    content: |
-      {
-        zone: 'Zone1'
-      }
-
-# The high side of the Gateway (i.e. to Low domain)
-  gateway_high:
-    content: |
-      {
-        host: "gateway.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # High Side Import Web Server
-  import_high:
-    content: |
-      {
-        host: "import.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
-  # High Side Ops Status Server
-  status_ops:
-    content: |
-      {
-        remote: {
-          protocol: https,
-          host: "status.ops.ctxd", 
-          port: 32001, 
-          channel: "ctxdStatus"
-        }
-      }
-
-  # External MQTT server
-  mqtt_high:
-    content: |
-      {
-        enabled:  true,
-        protocol: mqtt,
-        host:     "mqtt.high.ctxd",
-        port:     1883,
-        format:   json
-      }
-
-  # Alert targets
-  #
-  # Defaults
-  #   {
-  #     console: {enabled: true},
-  #     slack:   {enabled: false}
-  #     mqtt:    {enabled: false, protocol: mqtt, host: "mqtt.high.ctxd", port: 1883},    
-  #   }
-  #
-  # If enabling slack as an alert target then you also need to uncomment
-  # the slack secrets entries in 'secrets' and 'services.high_import' and provide the following values
-  #
-  #     slack: {enabled: true, token: readstring('/run/secrets/slack'), channel: 'ctxd'}
-  #
-  alerts_high:
-    content: |
-      {
-        console: {enabled: true},
-        slack:   {enabled: false},
-        mqtt:    {enabled: false},
-      }
-
-  # Thingsboard (Metrics)
-  thingsboard_high:
-    content: |
-      {enabled: false, host: null, port: null, protocol:http}
-
-  # Pipeline Telemetry
-  #
-  # If enabling pipeline telemetry to be sent to thingsboard you must also
-  # uncomment the thingsboard entries in 'secrets' and 'services.high_import' 
-  # and provide the following values
-  #  
-  #    thingsboard: {
-  #      enabled: true, 
-  #      host: "thingsboard.cloud", 
-  #      protocol: https, 
-  #      port: 443, 
-  #      token: readstring('/run/secrets/thingsboard')
-  #    }
-  #
-  stats_high:
-    content: |
-      {
-        thingsboard: {enabled: false}
-      }
-
+include:
+  - ./config-zone1.yml
+  
 #
 # Secrets
 #
 secrets:
   git:
     file: ../../secrets/high/git    
-#  slack:
-#    file: ../../secrets/high/slack    
 
 #
 # List of Dockers
@@ -116,35 +21,65 @@ secrets:
 services:
 
   high_import:
-    extends:
-      file: ./ctxd.yml
-      service: high_import
+    image:  ghcr.io/configuredthings/ctxd_high_import:${ctxd_version}
     hostname: import.high.zone1.ctxd  
+    networks:
+      ctxd_high:
+        aliases:
+           - status.high.zone1.ctxd
+      ctxd_ops:    
     configs:
+      - source: status_ops
+        target: /opt/ct/system/config/status.sfjs
+      - source: mqtt_high
+        target: /opt/ct/integrations/mqtt.sfjs  
       - source: zone
         target: /opt/ct/config/zone.sfjs
+      - source: import_high 
+        target: /opt/ct/config/import.sfjs
+      - source: config_high
+        target: /opt/ct/init-config/high-config-local.sfjs      
     volumes:
       - ../../volumes/zone1/high/import/certs:/opt/ct/certs
           
   high_export:
-    extends:
-      file: ./ctxd.yml
-      service: high_export
+    image:  ghcr.io/configuredthings/ctxd_high_export:${ctxd_version}
     hostname: export.high.zone1.ctxd  
+    networks:
+      ctxd_high:
+        aliases:
+          - config.high.zone1.ctxd
+      ctxd_ops:    
+    secrets:
+      - git  
     configs:
+      - source: status_ops
+        target: /opt/ct/system/config/status.sfjs
       - source: zone
         target: /opt/ct/config/zone.sfjs
+      - source: gateway_high 
+        target: /opt/ct/config/gateway.sfjs
+      - source: import_high 
+        target: /opt/ct/config/import.sfjs    
     volumes:
       - ../../volumes/zone1/high/export/certs:/opt/ct/certs
       - ../../volumes/zone1/high/export/keys:/opt/ct/keys
-      - ../../volumes/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
-      - ../../volumes/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
+      - ../../volumes/zone1/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
+      - ../../volumes/zone1/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
      
   high_mqtt:
-    extends: 
-      file: ./ctxd.yml
-      service: high_mqtt
+    image:  ghcr.io/configuredthings/ctxd_high_mqtt:${ctxd_version}
     hostname: mqtt.high.zone1.ctxd
+    ports:
+      - 31883:1883
+    networks:
+      ctxd_high:
+        aliases:
+          - mqtt.high.zone1.ctxd
+      ctxd_ops:    
+    configs:
+      - source: status_ops
+        target: /opt/ct/system/config/status.sfjs
     volumes:
       - ../../volumes/zone1/high/mqtt/certs:/opt/ct/certs
 

@@ -1,0 +1,51 @@
+# Contains the configuration values for zone 1  
+configs:
+
+  zone:
+    content: |
+      {
+        zone: 'Zone2'
+      }
+
+  status_ops:
+    content: |
+      {
+        remote: {
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
+        }
+      }
+
+  mqtt_high:
+    content: |
+      {
+        enabled:  true,
+        protocol: mqtt,
+        host:     "mqtt.high.zone2.ctxd",
+        port:     1883,
+        format:   json
+      }
+
+  gateway_high:
+    content: |
+      {
+        host: "gateway.high.zone2.ctxd",
+      }
+
+  import_high:
+    content: |
+      {
+        host: "import.high.zone2.ctxd",
+      }    
+
+  config_high:
+    content: |
+      {
+        high: {
+          Config: {
+            host: "config.high.zone2.ctxd",
+          },
+        }
+      }

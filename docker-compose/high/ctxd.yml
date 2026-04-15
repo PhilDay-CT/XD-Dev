@@ -4,99 +4,9 @@
 
 name: "ctxd-high"
 
-# Integrations with external systems are defined by
-# config blocks.  See the document  
-configs:
-
-  # High Side Ops Status Server
-  status_ops:
-    content: |
-      {
-        remote: {
-          protocol: https,
-          host: "status.ops.ctxd", 
-          port: 32001, 
-          channel: "ctxdStatus"
-        }
-      }
-
+include:
+  - ./config.yml
   
-  # The high side of the Gateway (i.e. to Low domain)
-  gateway_high:
-    content: |
-      {
-        host: "gateway.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # High Side Import Web Server
-  import_high:
-    content: |
-      {
-        host: "import.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
-  # External MQTT server
-  mqtt_high:
-    content: |
-      {
-        enabled:  true,
-        protocol: mqtt,
-        host:     "mqtt.high.ctxd",
-        port:     1883,
-        format:   json
-      }
-
-  # Alert targets
-  #
-  # Defaults
-  #   {
-  #     console: {enabled: true},
-  #     slack:   {enabled: false}
-  #     mqtt:    {enabled: false, protocol: mqtt, host: "mqtt.high.ctxd", port: 1883},    
-  #   }
-  #
-  # If enabling slack as an alert target then you also need to uncomment
-  # the slack secrets entries in 'secrets' and 'services.high_import' and provide the following values
-  #
-  #     slack: {enabled: true, token: readstring('/run/secrets/slack'), channel: 'ctxd'}
-  #
-  alerts_high:
-    content: |
-      {
-        console: {enabled: true},
-        slack:   {enabled: false},
-        mqtt:    {enabled: false},
-      }
-
-  # Thingsboard (Metrics)
-  thingsboard_high:
-    content: |
-      {enabled: false, host: null, port: null, protocol:http}
-
-  # Pipeline Telemetry
-  #
-  # If enabling pipeline telemetry to be sent to thingsboard you must also
-  # uncomment the thingsboard entries in 'secrets' and 'services.high_import' 
-  # and provide the following values
-  #  
-  #    thingsboard: {
-  #      enabled: true, 
-  #      host: "thingsboard.cloud", 
-  #      protocol: https, 
-  #      port: 443, 
-  #      token: readstring('/run/secrets/thingsboard')
-  #    }
-  #
-  stats_high:
-    content: |
-      {
-        thingsboard: {enabled: false}
-      }
-
 #
 # Secrets
 #
@@ -115,67 +25,48 @@ services:
   # High Domain Import Service
   #    
   high_import:
-    image:  ghcr.io/configuredthings/ctxd_high_import:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_high_import:${ctxd_version}
     hostname: import.high.ctxd
     networks:
       ctxd_high:
         aliases:
-          - import.high.ctxd
-          - status.high.ctxd
+           - status.high.ctxd
       ctxd_ops:    
-    volumes:
-      - ../../volumes/high/import/certs:/opt/ct/certs
-    #secrets:
-    #  - slack
-    #  - thingsboard
     configs:
       - source: status_ops
-        target: /opt/ct/system/config/status.sfjs  
-      - source: import_high
-        target: /opt/ct/config/import.sfjs
+        target: /opt/ct/system/config/status.sfjs
       - source: mqtt_high
-        target: /opt/ct/integrations/mqtt.sfjs
-      - source: thingsboard_high  
-        target: /opt/ct/integrations/thingsboard.sfjs
-      - source: alerts_high
-        target: /opt/ct/config/alerts.sfjs
-      - source: stats_high  
-        target: /opt/ct/config/stats.sfjs
-
+        target: /opt/ct/integrations/mqtt.sfjs    
+    volumes:
+      - ../../volumes/high/import/certs:/opt/ct/certs
     
   #
   # High Domain Export Service
   #  
   high_export:
-    image:  ghcr.io/configuredthings/ctxd_high_export:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_high_export:${ctxd_version}
     hostname: export.high.ctxd
     networks:
       ctxd_high:
         aliases:
           - config.high.ctxd
       ctxd_ops:    
-    volumes:
-      - ../../volumes/high/export/certs:/opt/ct/certs
-      - ../../volumes/high/export/keys:/opt/ct/keys
-      - ../../volumes/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
-      - ../../volumes/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
     secrets:
       - git  
     configs:
       - source: status_ops
         target: /opt/ct/system/config/status.sfjs  
-      - source: import_high
-        target: /opt/ct/config/import.sfjs
-      - source: gateway_high
-        target: /opt/ct/config/gateway.sfjs
-      - source: mqtt_high
-        target: /opt/ct/integrations/mqtt.sfjs
-
+    volumes:
+      - ../../volumes/high/export/certs:/opt/ct/certs
+      - ../../volumes/high/export/keys:/opt/ct/keys
+      - ../../volumes/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
+      - ../../volumes/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
+    
   #
   # High domain MQTT Server
   #
   high_mqtt:
-    image:  ghcr.io/configuredthings/ctxd_high_mqtt:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_high_mqtt:${ctxd_version}
     hostname: mqtt.high.ctxd
     ports:
       - 31883:1883

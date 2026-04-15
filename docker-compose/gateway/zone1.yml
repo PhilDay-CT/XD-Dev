@@ -5,75 +5,43 @@
 
 name: "ctxd"
 
-
-configs:
-
-  # Import Diode Config
-  import_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.low.ctxd'},
-        routes: {
-          default: 'http://import.high.ctxd:80/files'
-        }
-      }
-
-  # Export Diode Config
-  export_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.high.ctxd'},
-        routes: {
-          default: 'http://export.low.ctxd:80/files'
-        },
-      }
-
-  # High Side Import Status Server
-  status_high:
-    content: |
-      {
-        status: {
-          host: "import.high.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
-      }
-
+include:
+  - ./config-zone1.yml
+  
 services:
 
   #
   # Gateway
   #
   import_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_diode:${ctxd_version}
     hostname: import.gateway.zone1.ctxd
     networks:
       ctxd_low:
         aliases:
-          - gateway.low.ctxd
+          - gateway.low.zone1.ctxd
       ctxd_high:
     configs:
       - source: import_diode
         target: /opt/ct/config/diode.sfjs
       - source: status_high
         target: /opt/ct/system/config/status.sfjs
-
+    
           
   export_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_diode:${ctxd_version}
     hostname: export.gateway.zone1.ctxd
     networks:
       ctxd_high:
         aliases:
-          - gateway.high.ctxd
+          - gateway.high.zone1.ctxd
       ctxd_low:     
     configs:
       - source: export_diode
         target: /opt/ct/config/diode.sfjs
       - source: status_high
         target: /opt/ct/system/config/status.sfjs
-     
-  
+
 networks:
   ctxd_low:
     name: ctxd_low_1

@@ -16,17 +16,16 @@ services:
     extends: 
       file: ../ops/ops.yml
       service: status
-    image: ctxd_ops_status:3.3.0
+    image: ctxd_ops_status:${ctxd_version}
 
   console:
     extends: 
       file: ../ops/ops.yml
       service: console
-    image: sfjs-console:3.2.0
+    image: sfjs-console:${console_version}
     volumes:
-      - ../../volumes/ops/console/ct-admin/git-zones.sfjs:/opt/ct/gui/git.sfjs
+      - ../../volumes/ops/console/ct-admin/config/git-zones.sfjs:/opt/ct/gui/git.sfjs
   
 networks:
   ctxd_ops:
     name: ctxd_ops
-

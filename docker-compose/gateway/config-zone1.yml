@@ -1,0 +1,37 @@
+ 
+# Configuration settings for zone 1
+
+configs: 
+ 
+  # High Side Import Status Server
+  status_high:
+    content: |
+      {
+        status: {
+          host: "import.high.zone1.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+
+  # Import Diode Config
+  import_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.low.zone1.ctxd'},
+        routes: {
+          default: 'http://import.high.zone1.ctxd:80/files'
+        }
+      }
+
+  # Export Diode Config
+  export_diode:
+    content: |
+      {  
+        input:  {host: 'gateway.high.zone1.ctxd'},
+        routes: {
+          default: 'http://export.low.zone1.ctxd:80/files'
+        }
+      }
+ 
+ 

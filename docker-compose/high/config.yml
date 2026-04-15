@@ -1,0 +1,24 @@
+configs:
+
+  status_ops:
+    content: |
+      {
+        remote: {
+          protocol: https,
+          host: "status.ops.ctxd", 
+          port: 32001, 
+          channel: "ctxdStatus"
+        }
+      }
+
+  mqtt_high:
+    content: |
+      {
+        enabled:  true,
+        protocol: mqtt,
+        host:     "mqtt.high.ctxd",
+        port:     1883,
+        format:   json
+      }
+
+  

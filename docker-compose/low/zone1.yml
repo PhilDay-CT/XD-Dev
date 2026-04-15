@@ -5,99 +5,71 @@ name: "ctxd-1"
 # the Cross Domain services in "Mono" mode using
 # local images
 #
-configs:
+include:
+  - ./config-zone1.yml
 
-  zone:
-    content: |
-      {
-        zone: 'Zone1'
-      }
-
-  # Low side of the Gateway (i.e. to High domain)
-  gateway_low:
-    content: |
-      {
-        host: "gateway.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # Low Side Export Web Server
-  export_low:
-    content: |
-      {
-        host: "export.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
-  # External MQTT server
-  mqtt_low:
-    content: |
-      {
-          enabled:  true,
-          protocol: mqtt,
-          host:     "mqtt.low.ctxd",
-          port:     1883,
-          format:   json
-      }
-
-  # MM to connect to for configuration
-  config_low:
-    content: |
-      {
-        host: "config.low.ctxd",
-        port: 22000,
-        protocol: http,
-        channel: 'application',
-      }
-
-  # MM to send status to
-  status_low:
-    content: |
-      {
-        remote: {
-          host: "status.low.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
-      }
-    
   
 services:
 
   low_import:
-    extends:
-      file: ./ctxd.yml
-      service: low_import
+    image: ghcr.io/configuredthings/ctxd_low_import:${ctxd_version}
     hostname: import.low.zone1.ctxd  
+    networks:
+      ctxd_low:
+        aliases:
+          - status.low.zone1.ctxd
     configs:
       - source: zone
-        target: /opt/ct/config/zone.sfjs  
+        target: /opt/ct/config/zone.sfjs
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs    
+      - source: config_low
+        target: /opt/ct/init-config/low-config-local.sfjs
+      - source: mqtt_low
+        target: /opt/ct/integrations/mqtt.sfjs       
+     
 
   low_export:
-    extends:
-      file: ./ctxd.yml
-      service: low_export
+    image:  ghcr.io/configuredthings/ctxd_low_export:${ctxd_version}
     hostname: export.low.zone1.ctxd  
+    networks:
+      ctxd_low:
+        aliases:
+        - config.low.zone1.ctxd
     configs:
       - source: zone
         target: /opt/ct/config/zone.sfjs  
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs    
 
   low_mqtt:
-    extends: 
-      file: ./ctxd.yml
-      service: low_mqtt
+    image: ghcr.io/configuredthings/ctxd_low_mqtt:${ctxd_version}
     hostname: mqtt.low.zone1.ctxd  
-      
-  low_emulators:
-    extends:
-      file: ./emulators.yml
-      service: low_emulators
-    hostname: emulators.low.zone1.ctxd  
+    ports:
+      - 21883:1883
+    networks:
+      - ctxd_low
     configs:
       - source: zone
         target: /opt/ct/config/zone.sfjs  
+      - source: gateway_low
+        target: /opt/ct/config/gateway.sfjs    
+
+  low_emulators:
+    image:  ghcr.io/configuredthings/ctxd_low_emulators:${ctxd_version}
+    hostname: emulators.low.zone1.ctxd  
+    networks:
+      - ctxd_low
+    configs:
+      - source: zone
+        target: /opt/ct/config/zone.sfjs
+      - source: status_low
+        target: /opt/ct/system/config/status.sfjs  
+      - source: em_config_low
+        target: /opt/ct/config/config.sfjs  
+      - source: mqtt_low
+        target: /opt/ct/integrations/mqtt.sfjs  
+      
 
 networks:
   ctxd_low:

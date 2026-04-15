@@ -1,162 +1,14 @@
-name: "ctxd2"
+name: "ctxd-zone2"
 
 #
 # Docker Compose file for a development version of 
 # the Cross Domain services in "Mono" mode using
 # local images
 #
-configs:
-
-  zone:
-    content: |
-      {
-        zone: 'Zone2'
-      }
-
-  # High side of the Gateway (i.e. to Low domain)
-  gateway_high:
-    content: |
-      {
-        host: "gateway.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # High Side Import Web Server
-  import_high:
-    content: |
-      {
-        host: "import.high.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # High Side Ops Status Server
-  status_ops:
-    content: |
-      {
-        remote: {
-          protocol: https,
-          host: "status.ops.ctxd", 
-          port: 32001, 
-          channel: "ctxdStatus"
-        }
-      }
-
-  # High Side Import Status Server
-  status_high:
-    content: |
-      {
-        remote: {
-          host: "status.high.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
-      }
-
-  # External High Side MQTT server
-  mqtt_high:
-    content: |
-      {
-          enabled:  true,
-          protocol: mqtt,
-          host:     "mqtt.high.ctxd",
-          port:     1883,
-          format:   json
-      }
-
-  # Alert targets    
-  alerts_high:
-    content: |
-      {
-        console: {enabled: true},
-        slack:   {enabled: false},
-        mqtt:    {enabled: false},
-      }
-
-  # Thingsboard (Metrics)
-  thingsboard_high:
-    content: |
-      {enabled: false, host: null, port: null, protocol:http}
-
-
-  # Pipeline Telemetry
-  stats_high:
-    content: |
-      {
-        thingsboard: {enabled: false}
-      }    
-
-  # Low side of the Gateway (i.e. to High domain)
-  gateway_low:
-    content: |
-      {
-        host: "gateway.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  
-  # External Low Side MQTT server
-  mqtt_low:
-    content: |
-      {
-          enabled:  true,
-          protocol: mqtt,
-          host:     "mqtt.low.ctxd",
-          port:     1883,
-          format:   json
-      }
-
-  # Low Side Export Web Server
-  export_low:
-    content: |
-      {
-        host: "export.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # MM to connect to for configuration
-  config_low:
-    content: |
-      {
-        host: "config.low.ctxd",
-        port: 22000,
-        protocol: http,
-        channel: 'application',
-      }
-
-  # MM to send status to
-  status_low:
-    content: |
-      {
-        remote: {
-          host: "status.low.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
-      }
-    
-  # Import Diode Config
-  import_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.low.ctxd'},
-        routes: {
-          default: 'http://import.high.ctxd:80/files'
-        }
-      }
-
-  # Export Diode Config
-  export_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.high.ctxd'},
-        routes: {
-          default: 'http://export.low.ctxd:80/files'
-        }
-      }
+include:
+  - ../high/config-zone2.yml
+  - ../gateway/config-zone2.yml
+  - ../low/config-zone2.yml
 
 #
 # Secrets
@@ -164,8 +16,6 @@ configs:
 secrets:
   git:
     file: ../../secrets/high/git    
-  slack:
-    file: ../../secrets/high/slack    
 
 #
 # List of Dockers
@@ -176,65 +26,61 @@ services:
     extends: 
       file: ../high/zone2.yml
       service: high_mqtt
-    image: ctxd_high_mqtt:3.3.0
-    ports: !override
-      - 32883:1883
+    image: ctxd_high_mqtt:${ctxd_version}
       
   high_import:
     extends:
       file: ../high/zone2.yml
       service: high_import
-    image: ctxd_high_import:3.3.0
+    image: ctxd_high_import:${ctxd_version}
       
   high_export:
     extends:
       file: ../high/zone2.yml
       service: high_export
-    image: ctxd_high_export:3.3.0
-  
+    image: ctxd_high_export:${ctxd_version}
+    
   import_diode:
     extends: 
       file: ../gateway/zone2.yml
       service: import_diode
-    image: ctxd_diode:3.3.0
+    image: ctxd_diode:${ctxd_version}
           
   export_diode:
     extends: 
       file: ../gateway/zone2.yml
       service: export_diode
-    image: ctxd_diode:3.3.0
-
+    image: ctxd_diode:${ctxd_version}
+  
   low_mqtt:
     extends: 
       file: ../low/zone2.yml
       service: low_mqtt
-    image: ctxd_low_mqtt:3.3.0
-    ports: !override
-      - 22883:1883
+    image: ctxd_low_mqtt:${ctxd_version}
       
   low_import:
     extends:
       file: ../low/zone2.yml
       service: low_import
-    image: ctxd_low_import:3.3.0
+    image: ctxd_low_import:${ctxd_version}
 
   low_export:
     extends:
       file: ../low/zone2.yml
       service: low_export
-    image: ctxd_low_export:3.3.0
+    image: ctxd_low_export:${ctxd_version}
 
   low_emulators:
     extends:
       file: ../low/zone2.yml
       service: low_emulators
-    image: ctxd_low_emulators:3.3.0
+    image: ctxd_low_emulators:${ctxd_version}
 
 networks:
   ctxd_low:
-    name: ctxd_low_2
+    name: ctxd_low_1
   ctxd_high:
-    name: ctxd_high_2
+    name: ctxd_high_1
   ctxd_ops:
     name: ctxd_ops
     

@@ -1,0 +1,13 @@
+configs:
+
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+  

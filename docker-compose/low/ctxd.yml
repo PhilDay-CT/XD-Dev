@@ -4,89 +4,46 @@
 
 name: "ctxd-low"
 
-configs:
-
-  # Low side of the Gateway (i.e. to High domain)
-  gateway_low:
-    content: |
-      {
-        host: "gateway.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-
-  # Low Side Export Web Server
-  export_low:
-    content: |
-      {
-        host: "export.low.ctxd",
-        port: 80,
-        protocol: http,
-      }
-    
-  # External MQTT server
-  mqtt_low:
-    content: |
-      {
-          enabled:  true,
-          protocol: mqtt,
-          host:     "mqtt.low.ctxd",
-          port:     1883,
-          format:   json
-      }
-
+include:
+  - ./config.yml
+ 
 services:
 
   #
   # Low Domain Import Service
   #    
   low_import:
-    image: ghcr.io/configuredthings/ctxd_low_import:3.3.0
+    image: ghcr.io/configuredthings/ctxd_low_import:${ctxd_version}
     hostname: import.low.ctxd
     networks:
       ctxd_low:
         aliases:
-          - status.low.ctxd     
+          - status.low.ctxd
     configs:
-      - source: gateway_low
-        target: /opt/ct/config/gateway.sfjs
       - source: mqtt_low
-        target: /opt/ct/integrations/mqtt.sfjs
+        target: /opt/ct/integrations/mqtt.sfjs       
     
   #
   # Low Domain Export Service
   #  
   low_export:
-    image:  ghcr.io/configuredthings/ctxd_low_export:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_low_export:${ctxd_version}
     hostname: export.low.ctxd
     networks:
       ctxd_low:
         aliases:
           - config.low.ctxd
-          - export.low.ctxd
-    configs:
-      - source: gateway_low
-        target: /opt/ct/config/gateway.sfjs
-      - source: export_low
-        target: /opt/ct/config/export.sfjs
-      - source: mqtt_low
-        target: /opt/ct/integrations/mqtt.sfjs
       
   #
   # Low Domain MQTT Service
   #
   low_mqtt:
-    image: ghcr.io/configuredthings/ctxd_low_mqtt:3.3.0
+    image: ghcr.io/configuredthings/ctxd_low_mqtt:${ctxd_version}
     hostname: mqtt.low.ctxd
     ports:
       - 21883:1883
     networks:
-      ctxd_low:
-        aliases:
-          - mqtt.low.ctxd
-    configs:
-      - source: gateway_low
-        target: /opt/ct/config/gateway.sfjs
+      - ctxd_low
     
 networks:
   ctxd_low:

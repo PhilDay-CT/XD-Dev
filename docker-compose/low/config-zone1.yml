@@ -1,0 +1,65 @@
+# Contains the addition configuration values
+## needed for zone 1  
+configs:
+
+  zone:
+    content: |
+      {
+        zone: 'Zone1'
+      }
+
+  gateway_low:
+    content: |
+      {
+        host: "gateway.low.zone1.ctxd",
+      }
+
+  # Low Side Export Web Server
+  export_low:
+    content: |
+      {
+        host: "export.low.zone1.ctxd",
+      }
+
+  config_low:
+    content: |
+      {
+        low: {
+          Config: {
+            host: "config.low.zone1.ctxd",
+            protocol: http,
+          }
+        },
+      }
+
+  # MM to send status to
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.zone1.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+
+  mqtt_low:
+    content: |
+      {
+          enabled:  true,
+          protocol: mqtt,
+          host:     "mqtt.low.zone1.ctxd",
+          port:     1883,
+          format:   json
+      }
+
+  # Emulators currently has a different format for its
+  # config block 
+  em_config_low:
+    content: |
+      {
+        host: "config.low.zone1.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application'
+      }

@@ -5,47 +5,16 @@
 
 name: "ctxd"
 
-
-configs:
-
-  # Import Diode Config
-  import_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.low.ctxd'},
-        routes: {
-          default: 'http://import.high.ctxd:80/files'
-        }
-      }
-
-  # Export Diode Config
-  export_diode:
-    content: |
-      {  
-        input:  {host: 'gateway.high.ctxd'},
-        routes: {
-          default: 'http://export.low.ctxd:80/files'
-        },
-      }
-
-  # High Side Import Status Server
-  status_high:
-    content: |
-      {
-        status: {
-          host: "import.high.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
-      }
-
+include:
+  - ./config.yml
+  
 services:
 
   #
   # Gateway
   #
   import_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_diode:${ctxd_version}
     hostname: import.gateway.ctxd
     networks:
       ctxd_low:
@@ -60,7 +29,7 @@ services:
 
           
   export_diode:
-    image:  ghcr.io/configuredthings/ctxd_diode:3.3.0
+    image:  ghcr.io/configuredthings/ctxd_diode:${ctxd_version}
     hostname: export.gateway.ctxd
     networks:
       ctxd_high:

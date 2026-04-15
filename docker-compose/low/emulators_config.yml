@@ -1,0 +1,22 @@
+# Needed for Emulators docker, which doesn't build
+# from the low base image which has these as defaults
+configs:
+
+  status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+ 
+  config_low:
+    content: |
+      {
+        host: "config.low.ctxd",
+        port: 22000,
+        protocol: http,
+        channel: 'application',
+      }
