@@ -13,8 +13,10 @@ services:
   # Low Domain Import Service
   #    
   low_import:
-    image: ghcr.io/configuredthings/ctxd_low_import:${ctxd_version}
+    image: ghcr.io/configuredthings/ctxd_low:${ctxd_version}
     hostname: import.low.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/import
     networks:
       ctxd_low:
         aliases:
@@ -27,8 +29,10 @@ services:
   # Low Domain Export Service
   #  
   low_export:
-    image:  ghcr.io/configuredthings/ctxd_low_export:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_low:${ctxd_version}
     hostname: export.low.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/export
     networks:
       ctxd_low:
         aliases:
@@ -38,12 +42,15 @@ services:
   # Low Domain MQTT Service
   #
   low_mqtt:
-    image: ghcr.io/configuredthings/ctxd_low_mqtt:${ctxd_version}
+    image: eclipse-mosquitto:alpine
     hostname: mqtt.low.ctxd
     ports:
       - 21883:1883
     networks:
       - ctxd_low
+    configs:
+      - source: mosquitto_low
+        target: /mosquitto/config/mosquitto.conf      
     
 networks:
   ctxd_low:

@@ -19,7 +19,6 @@
 {
     provider: github,
     user: "PhilDay-CT",
-    repo: "github.com/PhilDay-CT/XD-Dev-config",
     origin: "github.com/PhilDay-CT/XD-Dev-config",
     branch: 'main'
 }

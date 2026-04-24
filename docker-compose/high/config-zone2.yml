@@ -7,17 +7,6 @@ configs:
         zone: 'Zone2'
       }
 
-  status_ops:
-    content: |
-      {
-        remote: {
-          protocol: https,
-          host: "status.ops.ctxd", 
-          port: 32001, 
-          channel: "ctxdStatus"
-        }
-      }
-
   mqtt_high:
     content: |
       {
@@ -28,6 +17,11 @@ configs:
         format:   json
       }
 
+  mosquitto_high:
+    content: |
+      listener 1883
+      allow_anonymous true
+      
   gateway_high:
     content: |
       {
@@ -43,9 +37,5 @@ configs:
   config_high:
     content: |
       {
-        high: {
-          Config: {
-            host: "config.high.zone2.ctxd",
-          },
-        }
+        host: "config.high.zone2.ctxd",
       }

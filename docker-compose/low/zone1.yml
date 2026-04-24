@@ -12,8 +12,10 @@ include:
 services:
 
   low_import:
-    image: ghcr.io/configuredthings/ctxd_low_import:${ctxd_version}
-    hostname: import.low.zone1.ctxd  
+    image: ghcr.io/configuredthings/ctxd_low:${ctxd_version}
+    hostname: import.low.zone1.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/import  
     networks:
       ctxd_low:
         aliases:
@@ -24,14 +26,16 @@ services:
       - source: gateway_low
         target: /opt/ct/config/gateway.sfjs    
       - source: config_low
-        target: /opt/ct/init-config/low-config-local.sfjs
+        target: /opt/ct/config/config.sfjs
       - source: mqtt_low
         target: /opt/ct/integrations/mqtt.sfjs       
      
 
   low_export:
-    image:  ghcr.io/configuredthings/ctxd_low_export:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_low:${ctxd_version}
     hostname: export.low.zone1.ctxd  
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/export  
     networks:
       ctxd_low:
         aliases:
@@ -43,27 +47,25 @@ services:
         target: /opt/ct/config/gateway.sfjs    
 
   low_mqtt:
-    image: ghcr.io/configuredthings/ctxd_low_mqtt:${ctxd_version}
+    image: eclipse-mosquitto:alpine
     hostname: mqtt.low.zone1.ctxd  
     ports:
       - 21883:1883
     networks:
       - ctxd_low
     configs:
-      - source: zone
-        target: /opt/ct/config/zone.sfjs  
-      - source: gateway_low
-        target: /opt/ct/config/gateway.sfjs    
+      - source: mosquitto_low
+        target: /mosquitto/config/mosquitto.conf   
 
   low_emulators:
-    image:  ghcr.io/configuredthings/ctxd_low_emulators:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_emulators:${ctxd_version}
     hostname: emulators.low.zone1.ctxd  
     networks:
       - ctxd_low
     configs:
       - source: zone
         target: /opt/ct/config/zone.sfjs
-      - source: status_low
+      - source: em_status_low
         target: /opt/ct/system/config/status.sfjs  
       - source: em_config_low
         target: /opt/ct/config/config.sfjs  

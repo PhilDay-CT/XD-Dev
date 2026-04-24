@@ -24,23 +24,8 @@ configs:
   config_low:
     content: |
       {
-        low: {
-          Config: {
-            host: "config.low.zone1.ctxd",
-            protocol: http,
-          }
-        },
-      }
-
-  # MM to send status to
-  status_low:
-    content: |
-      {
-        remote: {
-          host: "status.low.zone1.ctxd", 
-          port: 7776, 
-          channel: "ct-status"
-        }
+        host: "config.low.zone1.ctxd",
+        protocol: http,
       }
 
   mqtt_low:
@@ -53,8 +38,24 @@ configs:
           format:   json
       }
 
-  # Emulators currently has a different format for its
-  # config block 
+  mosquitto_low:
+    content: |
+      listener 1883
+      allow_anonymous true
+      sys_interval 0 
+      
+  # MM for Emulator send status to
+  em_status_low:
+    content: |
+      {
+        remote: {
+          host: "status.low.zone1.ctxd", 
+          port: 7776, 
+          channel: "ct-status"
+        }
+      }
+
+  # Config for Emulators
   em_config_low:
     content: |
       {

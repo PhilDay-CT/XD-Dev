@@ -21,16 +21,16 @@ secrets:
 services:
 
   high_import:
-    image:  ghcr.io/configuredthings/ctxd_high_import:${ctxd_version}
-    hostname: import.high.zone2.ctxd  
+    image:  ghcr.io/configuredthings/ctxd_high:${ctxd_version}
+    hostname: import.high.zone2.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/import     
     networks:
       ctxd_high:
         aliases:
            - status.high.zone2.ctxd
       ctxd_ops:    
     configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs
       - source: mqtt_high
         target: /opt/ct/integrations/mqtt.sfjs  
       - source: zone
@@ -38,13 +38,15 @@ services:
       - source: import_high 
         target: /opt/ct/config/import.sfjs
       - source: config_high
-        target: /opt/ct/init-config/high-config-local.sfjs      
+        target: /opt/ct/config/config.sfjs      
     volumes:
       - ../../volumes/zone2/high/import/certs:/opt/ct/certs
           
   high_export:
-    image:  ghcr.io/configuredthings/ctxd_high_export:${ctxd_version}
-    hostname: export.high.zone2.ctxd  
+    image:  ghcr.io/configuredthings/ctxd_high:${ctxd_version}
+    hostname: export.high.zone2.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/export      
     networks:
       ctxd_high:
         aliases:
@@ -53,8 +55,6 @@ services:
     secrets:
       - git  
     configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs
       - source: zone
         target: /opt/ct/config/zone.sfjs
       - source: gateway_high 
@@ -64,24 +64,19 @@ services:
     volumes:
       - ../../volumes/zone2/high/export/certs:/opt/ct/certs
       - ../../volumes/zone2/high/export/keys:/opt/ct/keys
-      - ../../volumes/zone2/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
+      - ../../volumes/zone2/high/export/git.sfjs:/opt/ct/config/git.sfjs
       - ../../volumes/zone2/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
      
   high_mqtt:
-    image:  ghcr.io/configuredthings/ctxd_high_mqtt:${ctxd_version}
+    image:  eclipse-mosquitto:alpine
     hostname: mqtt.high.zone2.ctxd
     ports:
       - 32883:1883
     networks:
-      ctxd_high:
-        aliases:
-          - mqtt.high.zone2.ctxd
-      ctxd_ops:    
+      - ctxd_high
     configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs
-    volumes:
-      - ../../volumes/zone2/high/mqtt/certs:/opt/ct/certs
+      - source: mosquitto_high
+        target: /mosquitto/config/mosquitto.conf 
 
 networks:
   ctxd_high:

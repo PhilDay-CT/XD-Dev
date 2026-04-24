@@ -14,14 +14,14 @@ services:
   # Low Domain Device Emulator Service
   #
   low_emulators:
-    image:  ghcr.io/configuredthings/ctxd_low_emulators:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_emulators:${ctxd_version}
     hostname: emulators.low.ctxd
     networks:
       - ctxd_low
     configs:
-      - source: status_low
+      - source: em_status_low
         target: /opt/ct/system/config/status.sfjs  
-      - source: config_low
+      - source: em_config_low
         target: /opt/ct/config/config.sfjs  
       - source: mqtt_low
         target: /opt/ct/integrations/mqtt.sfjs  

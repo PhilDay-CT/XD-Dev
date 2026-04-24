@@ -10,4 +10,8 @@ configs:
           format:   json
       }
 
-  
+  mosquitto_low:
+    content: |
+      listener 1883
+      allow_anonymous true
+      sys_interval 0 

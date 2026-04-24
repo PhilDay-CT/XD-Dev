@@ -25,16 +25,16 @@ services:
   # High Domain Import Service
   #    
   high_import:
-    image:  ghcr.io/configuredthings/ctxd_high_import:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_high:${ctxd_version}
     hostname: import.high.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/import
     networks:
       ctxd_high:
         aliases:
            - status.high.ctxd
       ctxd_ops:    
     configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs
       - source: mqtt_high
         target: /opt/ct/integrations/mqtt.sfjs    
     volumes:
@@ -44,8 +44,10 @@ services:
   # High Domain Export Service
   #  
   high_export:
-    image:  ghcr.io/configuredthings/ctxd_high_export:${ctxd_version}
+    image:  ghcr.io/configuredthings/ctxd_high:${ctxd_version}
     hostname: export.high.ctxd
+    environment:
+      - CT_INIT_DIR=/opt/ct/init/export
     networks:
       ctxd_high:
         aliases:
@@ -53,34 +55,26 @@ services:
       ctxd_ops:    
     secrets:
       - git  
-    configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs  
     volumes:
       - ../../volumes/high/export/certs:/opt/ct/certs
       - ../../volumes/high/export/keys:/opt/ct/keys
-      - ../../volumes/high/export/git.sfjs:/opt/ct/integrations/git.sfjs
+      - ../../volumes/high/export/git.sfjs:/opt/ct/config/git.sfjs
       - ../../volumes/high/export/signingPolicy.sfjs:/opt/ct/config/signingPolicy.sfjs
     
   #
   # High domain MQTT Server
   #
   high_mqtt:
-    image:  ghcr.io/configuredthings/ctxd_high_mqtt:${ctxd_version}
+    image:  eclipse-mosquitto:alpine
     hostname: mqtt.high.ctxd
     ports:
       - 31883:1883
     networks:
-      ctxd_high:
-        aliases:
-          - mqtt.high.ctxd
-      ctxd_ops:    
+      - ctxd_high
     configs:
-      - source: status_ops
-        target: /opt/ct/system/config/status.sfjs
-    volumes:
-      - ../../volumes/high/mqtt/certs:/opt/ct/certs
-
+      - source: mosquitto_high
+        target: /mosquitto/config/mosquitto.conf    
+    
 
 networks:
   ctxd_high:

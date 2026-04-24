@@ -26,19 +26,18 @@ services:
     extends: 
       file: ../high/zone1.yml
       service: high_mqtt
-    image: ctxd_high_mqtt:${ctxd_version}
       
   high_import:
     extends:
       file: ../high/zone1.yml
       service: high_import
-    image: ctxd_high_import:${ctxd_version}
+    image: ctxd_high:${ctxd_version}
       
   high_export:
     extends:
       file: ../high/zone1.yml
       service: high_export
-    image: ctxd_high_export:${ctxd_version}
+    image: ctxd_high:${ctxd_version}
     
   import_diode:
     extends: 
@@ -56,25 +55,24 @@ services:
     extends: 
       file: ../low/zone1.yml
       service: low_mqtt
-    image: ctxd_low_mqtt:${ctxd_version}
       
   low_import:
     extends:
       file: ../low/zone1.yml
       service: low_import
-    image: ctxd_low_import:${ctxd_version}
+    image: ctxd_low:${ctxd_version}
 
   low_export:
     extends:
       file: ../low/zone1.yml
       service: low_export
-    image: ctxd_low_export:${ctxd_version}
+    image: ctxd_low:${ctxd_version}
 
   low_emulators:
     extends:
       file: ../low/zone1.yml
       service: low_emulators
-    image: ctxd_low_emulators:${ctxd_version}
+    image: ctxd_emulators:${ctxd_version}
 
 networks:
   ctxd_low:
